@@ -27,36 +27,34 @@ def timer(delay):
     time.sleep(delay)
 
 
-def weatherscraper(url):
-
+def infoscraper(url):
+    error_count = 0
     try:
-
-
 #        thread1 = Thread(target=timer(15), daemon=True)
 #        thread1.start()
 #        timer(delay=10)
-#Try1
+
         json_url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=40.9369&lon=14.0334&altitude=15"
         page = requests.get(json_url)
-        page.content.pprint()
-
-#try2
-        soup_url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=40.9369&lon=14.0334&altitude=15"
-        page = requests.get(soup_url)
         soup = BeautifulSoup(page.content, 'html.parser')
-        soup.content.pprint()
+        print(soup)
+    except Exception as error:
+        print(error)
+        error_count += 1
 
+def weatherscraper(url):
+    error_count = 0
 # from https://www.geeksforgeeks.org/create-a-gui-for-weather-forecast-using-openweathermap-api-in-python/
-# necessary details
+    try:
         root = Tk()
         root.title("Weather App")
-        root.geometry("450x700")
+        root.geometry("450x525")
         root['background'] = "white"
 
         # Image
         new = ImageTk.PhotoImage(Image.open('logo.png'))
         panel = Label(root, image=new)
-        panel.place(x=0, y=520)
+        panel.place(x=350, y=75)
 
 
         # Dates
@@ -84,21 +82,21 @@ def weatherscraper(url):
 
         # City Search
         city_name = StringVar()
-        city_entry = Entry(root, textvariable=city_name, width=45)
+        city_entry = Entry(root, textvariable=city_name, width=42)
         city_entry.grid(row=1, column=0, ipady=10, stick=W+E+N+S)
 
 
         def city_name():
 
             # API Call
+            api_key = "x"
             api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
-                                       + city_entry.get() + "&units=metric&appid="+api_key)
-
+                                       + city_entry.get() + "&units=imperial&appid=" + api_key)
             api = json.loads(api_request.content)
 
             # Temperatures
             y = api['main']
-            current_temprature = y['temp']
+            current_temperature = y['temp']
             humidity = y['humidity']
             tempmin = y['temp_min']
             tempmax = y['temp_max']
@@ -114,7 +112,7 @@ def weatherscraper(url):
             citi = api['name']
 
             # Adding the received info into the screen
-            lable_temp.configure(text=current_temprature)
+            lable_temp.configure(text=current_temperature)
             lable_humidity.configure(text=humidity)
             max_temp.configure(text=tempmax)
             min_temp.configure(text=tempmin)
@@ -126,7 +124,7 @@ def weatherscraper(url):
 
         # Search Bar and Button
         city_nameButton = Button(root, text="Search", command=city_name)
-        city_nameButton.grid(row=1, column=1, padx=5, stick=W+E+N+S)
+        city_nameButton.grid(row=1, column=1, padx=4, stick=W+E+N+S)
 
 
         # Country  Names and Coordinates
@@ -162,7 +160,7 @@ def weatherscraper(url):
         lable_humidity.place(x=107, y=400)
 
 
-        maxi = Label(root, text="Max. Temp.: ", width=0,
+        maxi = Label(root, text="Max. Temp: ", width=0,
                      bg='white', font=("bold", 15))
         maxi.place(x=3, y=430)
 
@@ -171,7 +169,7 @@ def weatherscraper(url):
         max_temp.place(x=128, y=430)
 
 
-        mini = Label(root, text="Min. Temp.: ", width=0,
+        mini = Label(root, text="Min. Temp: ", width=0,
                      bg='white', font=("bold", 15))
         mini.place(x=3, y=460)
 
@@ -181,7 +179,7 @@ def weatherscraper(url):
 
 
         # Note
-        note = Label(root, text="All temperatures in degree celsius",
+        note = Label(root, text="All temperatures in degrees Fahrenheit",
                      bg='white', font=("italic", 10))
         note.place(x=95, y=495)
 
@@ -189,10 +187,8 @@ def weatherscraper(url):
         root.mainloop()
 
 
-
-
-
     except Exception as error:
+        print(error)
         error_count += 1
 
 
@@ -207,8 +203,9 @@ def weatherscraper(url):
 
 def main():
     url = "https://weather.com/weather/hourbyhour/l/bd6e61a96a73fe700823357bc4695a0342074429b43fdbee1202ed754b361eee"
+    infoscraper(url)
     weatherscraper(url)
-    exit(error_count)
+    exit()
 
 
 # Call the main function
