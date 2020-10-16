@@ -83,7 +83,7 @@ def weatherscraper(url):
 
         def city_name():
             # API Call
-            api_key = "894301acda297582e5e34973cbc1f4a9"
+            api_key = "x"
             api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                            + city_entry.get() + "&units=imperial&appid=" + api_key)
             api = json.loads(api_request.content)
