@@ -20,7 +20,6 @@ from PIL import ImageTk, Image
 
 
 global error_count, counter
-
 counter = 0
 
 def timer(delay):
@@ -78,14 +77,15 @@ def weatherscraper(url):
 
         # City Search
         city_name = StringVar()
+        city_name.set('Lago Patria')
         city_entry = Entry(root, textvariable=city_name, width=63)
         city_entry.grid(row=1, column=0, ipady=10, stick=W+E+N+S)
 
         def city_name():
             # API Call
-            api_key = "x"
+            api_key = "894301acda297582e5e34973cbc1f4a9"
             api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
-                                       + city_entry.get() + "&units=imperial&appid=" + api_key)
+                                           + city_entry.get() + "&units=imperial&appid=" + api_key)
             api = json.loads(api_request.content)
 
             # Temperatures
@@ -134,74 +134,63 @@ def weatherscraper(url):
             citi = api['name']
 
             # Adding the received info into the screen
-            lable_temp.configure(text=current_temperature)
-            lable_humidity.configure(text=humidity)
-            max_temp.configure(text="Max Temp: " + tempmax)
-            min_temp.configure(text=tempmin)
-            lable_lon.configure(text=longtitude)
-            lable_lat.configure(text=latitude)
-            lable_country.configure(text=country)
-            lable_citi.configure(text=citi)
+            lable_temp.configure(text=f"Temp: {current_temperature}")
+            lable_humidity.configure(text=f"Humidity: {humidity}%")
+            max_temp.configure(text="Max Temp Today: " + f"{tempmax}" + '\u00b0')
+            min_temp.configure(text=f"Min Temp Today: {tempmin}\u00b0")
+            lable_lon.configure(text=f"Longitude: {longtitude}")
+            lable_lat.configure(text=f"Latitude: {latitude}")
+            lable_country.configure(text=f"Country: {country}")
+            lable_citi.configure(text=f"City: {citi}")
 
         # Search Bar and Button
         city_nameButton = Button(root, text="  Search  ", command=city_name)
         city_nameButton.grid(row=1, column=1, padx=4, stick=W+E+N+S)
 
+
         # Country  Names and Coordinates
 
-        lable_citi = Label(root, text="...", width=0,
-                           bg='white', font=("bold", 15))
-        lable_citi.place(x=10, y=63)
+        lable_citi = Label(root, width=0, bg='white', font=("bold", 15))
+        lable_citi.place(x=5, y=40)
 
-        lable_country = Label(root, text="...", width=0,
-                              bg='white', font=("bold", 15))
-        lable_country.place(x=135, y=63)
+        lable_country = Label(root, width=0, bg='white', font=("bold", 15))
+        lable_country.place(x=135, y=40)
 
-        lable_lon = Label(root, text="...", width=0,
-                          bg='white', font=("Helvetica", 15))
-        lable_lon.place(x=25, y=95)
+        lable_lat = Label(root, width=0, bg='white', font=("Helvetica", 15))
+        lable_lat.place(x=5, y=70)
 
-        lable_lat = Label(root, text="...", width=0,
-                          bg='white', font=("Helvetica", 15))
-        lable_lat.place(x=95, y=95)
+        lable_lon = Label(root, width=0, bg='white', font=("Helvetica", 15))
+        lable_lon.place(x=5, y=100)
+
 
         # Current Temperature
-        lable_temp = Label(root, text="ERROR", width=0, bg=None,
-                           font=("Helvetica", 90), fg='black')
+        lable_temp = Label(root, text="ERROR", width=0, bg=None, font=("Helvetica", 90), fg='black')
         lable_temp.place(x=5, y=245)
 
         # Other temperature details
-        humi = Label(root, text="Humidity: ", width=0,
-                     bg='white', font=("bold", 15))
+        humi = Label(root, width=0, bg='white', font=("bold", 15))
         humi.place(x=3, y=430)
 
-        lable_humidity = Label(root, text="...", width=0,
-                               bg='white', font=("bold", 15))
+        lable_humidity = Label(root, width=0,bg='white', font=("bold", 15))
         lable_humidity.place(x=107, y=430)
 
 
-        maxi = Label(root, text="Max. Temp: ", width=0,
-                     bg='white', font=("bold", 15))
+        maxi = Label(root, width=0, bg='white', font=("bold", 15))
         maxi.place(x=3, y=460)
 
-        max_temp = Label(root, text="...", width=0,
-                         bg='white', font=("bold", 15))
+        max_temp = Label(root, width=0, bg='white', font=("bold", 15))
         max_temp.place(x=128, y=460)
 
 
-        mini = Label(root, text="Min. Temp: ", width=0,
-                     bg='white', font=("bold", 15))
+        mini = Label(root, width=0, bg='white', font=("bold", 15))
         mini.place(x=3, y=490)
 
-        min_temp = Label(root, text="...", width=0,
-                         bg='white', font=("bold", 15))
+        min_temp = Label(root, width=0, bg='white', font=("bold", 15))
         min_temp.place(x=128, y=490)
 
         # Note
-        note = Label(root, text="All temperatures in degrees Fahrenheit",
-                     bg='white', font=("italic", 10))
+        note = Label(root, text="All temperatures in degrees Fahrenheit", bg='white', font=("italic", 10))
         note.place(x=95, y=520)
-
 
 
 
@@ -235,4 +224,5 @@ def main():
 # Call the main function
 if __name__ == "__main__":
     main()
+
 
