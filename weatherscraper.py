@@ -40,6 +40,8 @@ class cityweather():
         self.init_counter = True
         self.sat_city = sat_city
         self.current_city = current_city
+        self.info_error_list = []
+        self.warn_error_list = []
 
     def api_call(self, button1=False, button2=False):
         # API Call
@@ -162,7 +164,7 @@ class cityweather():
 
             # TF 51/1 Logo Image
             new = ImageTk.PhotoImage(Image.open('logo.png'))
-            panel = Label(root, image=new)
+            panel = Label(root, bg='white', image=new)
             panel.place(x=410, y=230)
 
             # Dates
@@ -173,34 +175,32 @@ class cityweather():
             hour1 = Label(root, text=dt.strftime('%I : %M %p'),
                          bg='white', font=("bold", 15))
             hour1.place(x=3, y=170)
-
+            
+            # Weather Description
+            lable_descrip1 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
+            lable_descrip1.place(x=3, y=400)
+            lable_descrip2 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
+            lable_descrip2.place(x=((w/2)+3), y=400)
+            
             # Current Temperature
             lable_temp1 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
             lable_temp1.place(x=3, y=430)
             lable_temp2 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
             lable_temp2.place(x=((w/2)+3), y=430)
 
-            # Other temperature details
+            # Humidity
             lable_humidity1 = Label(root, width=0,bg='white', font=("bold", 15))
             lable_humidity1.place(x=3, y=460)
             lable_humidity2 = Label(root, width=0,bg='white', font=("bold", 15))
             lable_humidity2.place(x=((w/2)+3), y=460)
 
-            maxi1 = Label(root, width=0, bg='white', font=("bold", 15))
-            maxi1.place(x=3, y=490)
-            maxi2 = Label(root, width=0, bg='white', font=("bold", 15))
-            maxi2.place(x=((w/2)+3), y=490)
-
+            # Max Temperature
             max_temp1 = Label(root, width=0, bg='white', font=("bold", 15))
             max_temp1.place(x=3, y=490)
             max_temp2 = Label(root, width=0, bg='white', font=("bold", 15))
             max_temp2.place(x=((w/2)+3), y=490)
 
-            mini1 = Label(root, width=0, bg='white', font=("bold", 15))
-            mini1.place(x=3, y=520)
-            mini2 = Label(root, width=0, bg='white', font=("bold", 15))
-            mini2.place(x=((w/2)+3), y=520)
-
+            # Min Temperature
             min_temp1 = Label(root, width=0, bg='white', font=("bold", 15))
             min_temp1.place(x=3, y=520)
             min_temp2 = Label(root, width=0, bg='white', font=("bold", 15))
@@ -272,6 +272,7 @@ class cityweather():
             lable_lon1.configure(text=f"Longitude: {self.longtitude1}")
             lable_lat1.configure(text=f"Latitude: {self.latitude1}")
             lable_citi1.configure(text=f"Current: {self.citi1}, {self.country1}")
+            lable_descrip1.configure(text=f"Weather: {self.descrip1}")
 
             # Adding the received info into the screen for Satellite City
             lable_temp2.configure(text=f"Temperature: {self.current_temperature2}")
@@ -281,8 +282,7 @@ class cityweather():
             lable_lon2.configure(text=f"Longitude: {self.longtitude2}")
             lable_lat2.configure(text=f"Latitude: {self.latitude2}")
             lable_citi2.configure(text=f"STEP Loc: {self.citi2}, {self.country2}")
-
-
+            lable_descrip2.configure(text=f"Weather: {self.descrip2}")
 
             # Search Bar and Button
             city_nameButton1 = Button(root, text="Update Current City", command=self.api_call(button1=True))
@@ -294,18 +294,79 @@ class cityweather():
             #city_nameButton.flash()
             root.mainloop()
 
-        except ConnectionError:
+        except ConnectionError as error:
             self.error_count += 1
+            self.info_error_list.append(error)
+            print(error)
+            # 30 second timer for checking for connection problems
+            timer.sleep(30)
+            self.app_setup()
 
         except Exception as error:
+            self.warn_error_list.append(error)
             print(error)
             self.error_count += 1
+            
+    def big_timer(self):
+        # 15 min timer for updating weather info
+        timer.sleep(900)
+
+        
+class LogFormatter(cityweather):
+    """ Basic system log message generator to identify significant events and errors for troubleshooting """
+    def __init__(self, application_name="DJC2 20.2 'The Looters' Weather App"):
+        self.application_name = application_name
+        self.start_time = datetime.datetime.today()
+        handler = logging.handlers.SysLogHandler()
+        formatter = logging.Formatter('%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+        handler.setFormatter(formatter)
+        pdfscraper_log = logging.getLogger(__name__)
+        pdfscraper_log.setLevel(logging.DEBUG)
+        pdfscraper_log.addHandler(handler)
+
+    def log_message_begin(self):
+        begin_message = f"Beginning {application_name}, 'start_time'={self.start_time}, 'originating_process'={__name__};"
+        print(begin_message)
+        logging.info(begin_message)
+
+    def info_message(self, object):
+        for error in object.info_error_list
+            logging.info(error)
+
+    def warn_message(self, object):
+        for error in object.warn_error_list:
+            logging.warning(error)
+
+    def log_message_end(self, object):
+        if object.error_count > 0:
+            self.warn_message(object)
+            self.info_message(object)
+        self.end_time = datetime.datetime.today()
+        self.runtime = self.end_time - self.start_time
+        end_message = f"Ending {application_name}, 'end_time'={self.end_time}, 'run_time'={self.runtime};"
+        print(end_message)
+        logging.info(end_message)
+
+    def log_message_errorsum(self, errorcount):
+        errormessage = f"Sum of errors in {application_name}, 'total_error_count'={errorcount};"
+        logging.warning(errormessage)
 
 
 def main():
-    firstcity = cityweather(current_city='Aqaba', sat_city='Lago Patria')
-    firstcity.app_setup()
-    exit()
+    log_obj = LogFormatter()
+    log_obj.log_message_begin()
+    
+    # Application initialization
+    weatherapp = cityweather(current_city='Aqaba', sat_city='Lago Patria')
+    weatherapp.app_setup()
+    
+    # Final log messages for recording completion and problems
+    log_obj.log_message_end(weatherapp)
+    if weatherapp.error_count > 0:
+        log_obj.log_message_errorsum(weatherapp.error_count)
+        exit(1)
+    else:
+        exit(0)
 
 
 # Call the main function
