@@ -42,6 +42,7 @@ class cityweather():
         self.current_city = current_city
         self.info_error_list = []
         self.warn_error_list = []
+        self.button1, self.button2 = False
 
     def api_call(self, button1=False, button2=False):
         # API Call
