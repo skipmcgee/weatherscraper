@@ -296,14 +296,14 @@ class cityweather():
 
         except ConnectionError as error:
             self.error_count += 1
-            self.info_error_list.append(error)
+            self.info_error_list.append(f"{error}:{datetime.datetime.today()}")
             print(error)
             # 30 second timer for checking for connection problems
             timer.sleep(30)
             self.app_setup()
 
         except Exception as error:
-            self.warn_error_list.append(error)
+            self.warn_error_list.append(f"{error}:{datetime.datetime.today()}")
             print(error)
             self.error_count += 1
             
@@ -312,9 +312,9 @@ class cityweather():
         timer.sleep(900)
 
         
-class LogFormatter(cityweather):
+class LogFormatter(logging.Formatter, cityweather):
     """ Basic system log message generator to identify significant events and errors for troubleshooting """
-    def __init__(self, application_name="DJC2 20.2 'The Looters' Weather App"):
+    def __init__(self, application_name):
         self.application_name = application_name
         self.start_time = datetime.datetime.today()
         handler = logging.handlers.SysLogHandler()
@@ -324,19 +324,23 @@ class LogFormatter(cityweather):
         pdfscraper_log.setLevel(logging.DEBUG)
         pdfscraper_log.addHandler(handler)
 
+    # Start with a log message identifying application initialization
     def log_message_begin(self):
         begin_message = f"Beginning {application_name}, 'start_time'={self.start_time}, 'originating_process'={__name__};"
         print(begin_message)
         logging.info(begin_message)
 
+    # Not a real-time solution, but logs errors once the application ends based on a list created by another object
     def info_message(self, object):
         for error in object.info_error_list
             logging.info(error)
 
+    # Not a real-time solution, but logs errors once the application ends based on a list created by another object 
     def warn_message(self, object):
         for error in object.warn_error_list:
             logging.warning(error)
 
+    # Identifies application completion and records the total number of errors encountered
     def log_message_end(self, object):
         if object.error_count > 0:
             self.warn_message(object)
@@ -353,7 +357,9 @@ class LogFormatter(cityweather):
 
 
 def main():
-    log_obj = LogFormatter()
+    
+    # Log Object initialization
+    log_obj = LogFormatter(application_name="DJC2 20.2 'The Looters' Weather App")
     log_obj.log_message_begin()
     
     # Application initialization
@@ -363,7 +369,7 @@ def main():
     # Final log messages for recording completion and problems
     log_obj.log_message_end(weatherapp)
     if weatherapp.error_count > 0:
-        log_obj.log_message_errorsum(weatherapp.error_count)
+        log_obj.log_message_errorsum(errorcount=weatherapp.error_count)
         exit(1)
     else:
         exit(0)
