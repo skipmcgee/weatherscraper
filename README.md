@@ -7,4 +7,4 @@ In order to access the API that we use in this application,
 -Browse to: https://openweathermap.org/api
 -Under the options, subscribe for the "Free Current Weather". Create an API key.
 -Add your key to the "api_key" variable below. Run this little application!
-(Note: If not a "Looter", you could consider changing the application name, logo and defau
+(Note: If not a "Looter", you could consider changing the application name, logo and default locations.)
