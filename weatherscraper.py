@@ -4,12 +4,13 @@
 #
 # Created by Skip McGee for DJC2 20.2 AKA "The Looters" on 20201020.
 #
-# Ever need to answer the question of if the distant end of a satellite connection is masking equipment 
+# Ever need want to check if the distant end of a satellite connection is masking equipment 
 # problems as "weather problems"?
 #
 # This application is designed to display the current weather at your location + the current weather 
-# at a second location of your choosing (like for hub/spoke satellite sites, etc.). It also provides a 
-# helpful network checker and can inform you if you experience significant network interruptions / issues.  
+# at a second location of your choosing (like for hub/spoke satellite sites, etc.). Leave this application
+# running in your COC and it also provides a helpful network checker to can inform you of significant 
+# network interruptions / issues.  
 #
 # In order to access the API that we use in this application, 
 # Browse to: https://openweathermap.org/api
