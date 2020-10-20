@@ -49,7 +49,7 @@ class cityweather():
         self.counter = 0
     def api_call(self):
         # API Call
-        api_key = "894301acda297582e5e34973cbc1f4a9"
+        api_key = "x"
         api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                        + "Lago Patria" + "&units=imperial&appid=" + api_key)
         if self.counter > 0:
