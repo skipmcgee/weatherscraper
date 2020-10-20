@@ -66,6 +66,9 @@ class cityweather():
             sat_api = json.loads(sat_api_request.content)
         else:
             print("Error with api_call() method")
+            self.error_count += 1
+            self.info_error_list.append(f"{error}:{datetime.datetime.today()}")
+            print(error)
             exit(1)
 
         # Satellite City Temperatures
