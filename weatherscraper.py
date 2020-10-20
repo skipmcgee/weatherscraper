@@ -2,7 +2,10 @@
 
 ##################################################################################
 #
-# Created by Skip McGee for DJC2 20.2 AKA "The Looters" on 20201012
+# Created by Skip McGee for DJC2 20.2 AKA "The Looters" on 20201020
+# Useful weather URLs:
+# hourly_forecast_url = "https://weather.com/weather/hourbyhour/l/bd6e61a96a73fe700823357bc4695a0342074429b43fdbee1202ed754b361eee"
+# json_api_url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=40.9369&lon=14.0334&altitude=15"
 #
 #
 ##################################################################################
@@ -18,13 +21,6 @@ import json
 import datetime
 from PIL import ImageTk, Image
 
-
-global error_count, counter
-
-#        thread1 = Thread(target=timer(15), daemon=True)
-#        thread1.start()
-#        timer(delay=10)
-
 # <script src="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/external_box_hour_by_hour.js"></script><noscript><a href="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/">yr.no: Forecast for Lago di Patria</a></noscript>
 
 # HTML for the above: document.write('\n'
@@ -37,126 +33,185 @@ global error_count, counter
 #        json_url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=40.9369&lon=14.0334&altitude=15"
 #        page = requests.get(json_url)
 #        soup = BeautifulSoup(page.content, 'html.parser')
-#        print(soup)
-#    except Exception as error:
-#        print(error)
-#        error_count += 1
-#url = "https://weather.com/weather/hourbyhour/l/bd6e61a96a73fe700823357bc4695a0342074429b43fdbee1202ed754b361eee"
 
 class cityweather():
-    def __init__(self):
+    def __init__(self, current_city='Aqaba', sat_city='Lago Patria'):
         self.error_count = 0
-        self.counter = 0
-    def api_call(self):
+        self.init_counter = True
+        self.sat_city = sat_city
+        self.current_city = current_city
+
+    def api_call(self, button1=False, button2=False):
         # API Call
+        global sat_api_request, cur_api_request, sat_api, cur_api
         api_key = "x"
-        api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
-                                       + "Lago Patria" + "&units=imperial&appid=" + api_key)
-        if self.counter > 0:
-            api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
-                                       + self.city_entry.get() + "&units=imperial&appid=" + api_key)
-        api = json.loads(api_request.content)
-        # Temperatures
-        y = api['main']
-        self.current_temperature = y['temp']
-        self.humidity = y['humidity']
-        self.tempmin = y['temp_min']
-        self.tempmax = y['temp_max']
+        if self.init_counter == True:
+            sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
+                                    + self.sat_city + "&units=imperial&appid=" + api_key)
+            cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
+                                    + self.current_city + "&units=imperial&appid=" + api_key)
+            sat_api = json.loads(sat_api_request.content)
+            cur_api = json.loads(cur_api_request.content)
+        elif button1 == True:
+            cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
+                                       + self.current_city + "&units=imperial&appid=" + api_key)
+            cur_api = json.loads(cur_api_request.content)
+        elif button2 == True:
+            sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
+                                       + self.sat_city + "&units=imperial&appid=" + api_key)
+            sat_api = json.loads(sat_api_request.content)
+        else:
+            print("Error with api_call() method")
+            exit(1)
 
-        # Icon
-        i = api['weather']
-        self.icon = [dict['icon'] for dict in i]
-        self.description = [dict['description'] for dict in i]
-        self.icon_url = f"http://openweathermap.org/img/wn/{self.icon}@2x.png"
+        # Satellite City Temperatures
+        a = sat_api['main']
+        self.current_temperature1 = a['temp']
+        self.humidity1 = a['humidity']
+        self.tempmin1 = a['temp_min']
+        self.tempmax1 = a['temp_max']
 
-        # Coordinates
-        x = api['coord']
-        self.longtitude = x['lon']
-        self.latitude = x['lat']
+        # Satellite City Icon
+        b = sat_api['weather']
+        self.icon1 = [dict['icon'] for dict in b]
+        self.description1 = [dict['description'] for dict in b]
+        self.icon_url1 = f"http://openweathermap.org/img/wn/{self.icon1}@2x.png"
 
-        # Country
-        z = api['sys']
-        self.country = z['country']
-        self.citi = api['name']
-        print("completed")
+        # Satellite City Coordinates
+        c = sat_api['coord']
+        self.longtitude1 = c['lon']
+        self.latitude1 = c['lat']
 
-        # Increase counter
-        self.counter += 1
-# from https://www.geeksforgeeks.org/create-a-gui-for-weather-forecast-using-openweathermap-api-in-python/
+        # Satellite City Country
+        d = sat_api['sys']
+        self.country1 = d['country']
+
+        # Satellite City
+        self.citi1 = sat_api['name']
+
+        # Current City Temperatures
+        z = cur_api['main']
+        self.current_temperature2 = z['temp']
+        self.humidity2 = z['humidity']
+        self.tempmin2 = z['temp_min']
+        self.tempmax2 = z['temp_max']
+
+        # Current City Icon
+        y = cur_api['weather']
+        self.icon2 = [dict['icon'] for dict in y]
+        self.description2 = [dict['description'] for dict in y]
+        self.icon_url2 = f"http://openweathermap.org/img/wn/{self.icon2}@2x.png"
+
+        # Current City Coordinates
+        x = cur_api['coord']
+        self.longtitude2 = c['lon']
+        self.latitude2 = c['lat']
+
+        # Current City Country
+        d = cur_api['sys']
+        self.country2 = d['country']
+
+        # Current City
+        self.citi2 = cur_api['name']
+
+        # Change counter for future API queries
+        self.init_counter = False
 
     def app_setup(self):
         # Date Variable
         dt = datetime.datetime.now()
         try:
+            w,l = 500,580
             root = Tk()
-            root.title("Weather App")
-            root.geometry("450x550")
+            root.title("DJC2 20.2 'The Looters' Weather App")
+            root.geometry(f"{w}x{l}")
             root['background'] = "white"
 
-            # City Search
-            city_name = StringVar()
-            city_name.set("Lago Patria")
-            city_entry = Entry(root, textvariable=city_name, width=63)
-            city_entry.grid(row=1, column=0, ipady=10, stick=W+E+N+S)
+            # Current City Search
+            self.city2_name = StringVar()
+            self.city2_name.set(self.current_city)
+            city2_entry = Entry(root, textvariable=self.city2_name, width=63)
+            city2_entry.grid(row=0, column=0, ipady=10, stick=W+E+N+S)
+            self.current_city = city2_entry.get()
 
-            # Country  Names and Coordinates
-            lable_citi = Label(root, width=0, bg='white', font=("bold", 15))
-            lable_citi.place(x=3, y=40)
+            # Sat City Search
+            self.city1_name = StringVar()
+            self.city1_name.set(self.sat_city)
+            city1_entry = Entry(root, textvariable=self.city1_name, width=63)
+            city1_entry.grid(row=1, column=0, ipady=10, stick=W+E+N+S)
+            self.current_city = city1_entry.get()
 
-            lable_country = Label(root, width=0, bg='white', font=("bold", 15))
-            lable_country.place(x=200, y=40)
+            # Update API info
+            self.api_call()
 
-            lable_lat = Label(root, width=0, bg='white', font=("Helvetica", 15))
-            lable_lat.place(x=3, y=70)
+            # Country Names and Coordinates
+            lable_citi1 = Label(root, width=0, bg='white', font=("bold", 15))
+            lable_citi1.place(x=3, y=80)
+            lable_citi2 = Label(root, width=0, bg='white', font=("bold", 15))
+            lable_citi2.place(x=((w/2)+3), y=80)
 
-            lable_lon = Label(root, width=0, bg='white', font=("Helvetica", 15))
-            lable_lon.place(x=3, y=100)
+            lable_lat1 = Label(root, width=0, bg='white', font=("Helvetica", 15))
+            lable_lat1.place(x=3, y=110)
+            lable_lat2 = Label(root, width=0, bg='white', font=("Helvetica", 15))
+            lable_lat2.place(x=((w/2)+3), y=110)
 
-            # Image
+            lable_lon1 = Label(root, width=0, bg='white', font=("Helvetica", 15))
+            lable_lon1.place(x=3, y=140)
+            lable_lon2 = Label(root, width=0, bg='white', font=("Helvetica", 15))
+            lable_lon2.place(x=((w/2)+3), y=140)
+
+            # TF 51/1 Logo Image
             new = ImageTk.PhotoImage(Image.open('logo.png'))
             panel = Label(root, image=new)
-            panel.place(x=350, y=75)
+            panel.place(x=410, y=230)
 
             # Dates
-            date = Label(root, text=dt.strftime('%A, %C %B, %Y'), bg='white', font=("bold", 15))
-            date.place(x=5, y=160)
+            date1 = Label(root, text=dt.strftime('Time: %A, %C %B, %Y'), bg='white', font=("bold", 15))
+            date1.place(x=3, y=200)
 
             # Time
-            hour = Label(root, text=dt.strftime('%I : %M %p'),
+            hour1 = Label(root, text=dt.strftime('%I : %M %p'),
                          bg='white', font=("bold", 15))
-            hour.place(x=3, y=130)
+            hour1.place(x=3, y=170)
 
             # Current Temperature
-            lable_temp = Label(root, text="ERROR", width=0, bg=None, font=("Helvetica", 90), fg='black')
-            lable_temp.place(x=3, y=245)
+            lable_temp1 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
+            lable_temp1.place(x=3, y=430)
+            lable_temp2 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
+            lable_temp2.place(x=((w/2)+3), y=430)
 
             # Other temperature details
-            humi = Label(root, width=0, bg='white', font=("bold", 15))
-            humi.place(x=3, y=430)
+            lable_humidity1 = Label(root, width=0,bg='white', font=("bold", 15))
+            lable_humidity1.place(x=3, y=460)
+            lable_humidity2 = Label(root, width=0,bg='white', font=("bold", 15))
+            lable_humidity2.place(x=((w/2)+3), y=460)
 
-            lable_humidity = Label(root, width=0,bg='white', font=("bold", 15))
-            lable_humidity.place(x=3, y=430)
+            maxi1 = Label(root, width=0, bg='white', font=("bold", 15))
+            maxi1.place(x=3, y=490)
+            maxi2 = Label(root, width=0, bg='white', font=("bold", 15))
+            maxi2.place(x=((w/2)+3), y=490)
 
+            max_temp1 = Label(root, width=0, bg='white', font=("bold", 15))
+            max_temp1.place(x=3, y=490)
+            max_temp2 = Label(root, width=0, bg='white', font=("bold", 15))
+            max_temp2.place(x=((w/2)+3), y=490)
 
-            maxi = Label(root, width=0, bg='white', font=("bold", 15))
-            maxi.place(x=3, y=460)
+            mini1 = Label(root, width=0, bg='white', font=("bold", 15))
+            mini1.place(x=3, y=520)
+            mini2 = Label(root, width=0, bg='white', font=("bold", 15))
+            mini2.place(x=((w/2)+3), y=520)
 
-            max_temp = Label(root, width=0, bg='white', font=("bold", 15))
-            max_temp.place(x=3, y=460)
-
-
-            mini = Label(root, width=0, bg='white', font=("bold", 15))
-            mini.place(x=3, y=490)
-
-            min_temp = Label(root, width=0, bg='white', font=("bold", 15))
-            min_temp.place(x=3, y=490)
+            min_temp1 = Label(root, width=0, bg='white', font=("bold", 15))
+            min_temp1.place(x=3, y=520)
+            min_temp2 = Label(root, width=0, bg='white', font=("bold", 15))
+            min_temp2.place(x=((w/2)+3), y=520)
 
             # Note
             note = Label(root, text="All temperatures in degrees Fahrenheit", bg='white', font=("italic", 10))
-            note.place(x=95, y=520)
+            note.place(x=120, y=550)
 
             # Theme for current sun/rain status:
-            def get_source(src=self.icon_url):
+            def get_source(src=self.icon_url1):
                 r = requests.get(src)
                 if r.status_code == 200:
                     return soup(r.text)
@@ -170,7 +225,7 @@ class cityweather():
                 else:
                     sys.exit("[~] No images detected on the page.")
 
-            def requesthandle(src):
+            def requesthandle(src=self.icon_url1):
                 try:
                     r = requests.get(src, stream=True)
                     if r.status_code == 200:
@@ -209,19 +264,31 @@ class cityweather():
                panel = Label(root, image=img)
                panel.place(x=210, y=200)
 
-            # Adding the received info into the screen
-            lable_temp.configure(text=f"Temp: {self.current_temperature}")
-            lable_humidity.configure(text=f"Humidity: {self.humidity}%")
-            max_temp.configure(text="Max Temp Today: " + f"{self.tempmax}" + '\u00b0')
-            min_temp.configure(text=f"Min Temp Today: {self.tempmin}\u00b0")
-            lable_lon.configure(text=f"Longitude: {self.longtitude}")
-            lable_lat.configure(text=f"Latitude: {self.latitude}")
-            lable_country.configure(text=f"Country: {self.country}")
-            lable_citi.configure(text=f"City: {self.citi}")
+            # Adding the received info into the screen for Current City
+            lable_temp1.configure(text=f"Temperature: {self.current_temperature1}")
+            lable_humidity1.configure(text=f"Humidity: {self.humidity1}%")
+            max_temp1.configure(text="Max Temp Today: " + f"{self.tempmax1}" + '\u00b0')
+            min_temp1.configure(text=f"Min Temp Today: {self.tempmin1}\u00b0")
+            lable_lon1.configure(text=f"Longitude: {self.longtitude1}")
+            lable_lat1.configure(text=f"Latitude: {self.latitude1}")
+            lable_citi1.configure(text=f"Current: {self.citi1}, {self.country1}")
+
+            # Adding the received info into the screen for Satellite City
+            lable_temp2.configure(text=f"Temperature: {self.current_temperature2}")
+            lable_humidity2.configure(text=f"Humidity: {self.humidity2}%")
+            max_temp2.configure(text="Max Temp Today: " + f"{self.tempmax2}" + '\u00b0')
+            min_temp2.configure(text=f"Min Temp Today: {self.tempmin2}\u00b0")
+            lable_lon2.configure(text=f"Longitude: {self.longtitude2}")
+            lable_lat2.configure(text=f"Latitude: {self.latitude2}")
+            lable_citi2.configure(text=f"STEP Loc: {self.citi2}, {self.country2}")
+
+
 
             # Search Bar and Button
-            city_nameButton = Button(root, text="  Search  ", command=self.api_call)
-            city_nameButton.grid(row=1, column=1, padx=4, stick=W+E+N+S)
+            city_nameButton1 = Button(root, text="Update Current City", command=self.api_call(button1=True))
+            city_nameButton1.grid(row=0, column=1, padx=1, stick=W+E+N+S)
+            city_nameButton2 = Button(root, text="Update STEP City  ", command=self.api_call(button2=True))
+            city_nameButton2.grid(row=1, column=1, padx=1, stick=W+E+N+S)
             #city_nameButton.update()
             #city_nameButton.invoke()
             #city_nameButton.flash()
@@ -234,9 +301,9 @@ class cityweather():
             print(error)
             self.error_count += 1
 
+
 def main():
-    firstcity = cityweather()
-    firstcity.api_call()
+    firstcity = cityweather(current_city='Aqaba', sat_city='Lago Patria')
     firstcity.app_setup()
     exit()
 
@@ -244,5 +311,6 @@ def main():
 # Call the main function
 if __name__ == "__main__":
     main()
+
 
 
