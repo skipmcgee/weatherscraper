@@ -46,6 +46,7 @@ class cityweather():
     def api_call(self, button1=False, button2=False):
         # API Call
         global sat_api_request, cur_api_request, sat_api, cur_api
+        self.button1, self.button2 = button1, button2
         api_key = "x"
         if self.init_counter == True:
             sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
@@ -116,7 +117,7 @@ class cityweather():
         # Current City
         self.citi2 = cur_api['name']
 
-        # Change counter for future API queries
+        # Reset counter for future API queries
         self.init_counter = False
 
     def app_setup(self):
@@ -292,6 +293,15 @@ class cityweather():
             #city_nameButton.update()
             #city_nameButton.invoke()
             #city_nameButton.flash()
+            
+            
+            # Need to add a looping thread to conduct a 15 min sleep and then call the api for updated information
+            # if self.button1 == True or self.button2 ==True:
+            #     join()
+            #     complete root loop
+            #     start sleep thread again 
+            # else:
+            #     call sleep thread again
             root.mainloop()
 
         except ConnectionError as error:
