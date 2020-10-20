@@ -1,14 +1,27 @@
 #!/usr/bin/env python3
 
-##################################################################################
+############################################################################################################
 #
-# Created by Skip McGee for DJC2 20.2 AKA "The Looters" on 20201020
-# Useful weather URLs:
+# Created by Skip McGee for DJC2 20.2 AKA "The Looters" on 20201020.
+#
+# Ever need to answer the question of if the distant end of a satellite connection is masking equipment 
+# problems as "weather problems"?
+#
+# This application is designed to display the current weather at your location + the current weather 
+# at a second location of your choosing (like for hub/spoke satellite sites, etc.). It also provides a 
+# helpful network checker and can inform you if you experience significant network interruptions / issues.  
+#
+# In order to access the API that we use in this application, 
+# Browse to: https://openweathermap.org/api
+# Under the options, subscribe for the "Free Current Weather". Create an API key.
+# Add your key to the "api_key" variable below. Run this little application!
+# (Note: If not a "Looter", you could consider changing the application name, logo and default locations.)
+#
+# Other Useful weather URLs:
 # hourly_forecast_url = "https://weather.com/weather/hourbyhour/l/bd6e61a96a73fe700823357bc4695a0342074429b43fdbee1202ed754b361eee"
 # json_api_url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=40.9369&lon=14.0334&altitude=15"
 #
-#
-##################################################################################
+############################################################################################################
 
 import logging
 import logging.handlers
