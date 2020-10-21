@@ -120,7 +120,7 @@ class cityweather(LogFormatter):
         global sat_api_request, cur_api_request, sat_api, cur_api
         self.button1 = button1
         self.button2 = button2
-        api_key = "894301acda297582e5e34973cbc1f4a9"
+        api_key = "x"
         if self.init_counter == True:
             sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                     + self.sat_city + "&units=imperial&appid=" + api_key)
