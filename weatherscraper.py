@@ -4,15 +4,15 @@
 #
 # Created by Skip McGee for DJC2 20.2 AKA "The Looters" on 20201020.
 #
-# Ever need want to check if the distant end of a satellite connection is masking equipment 
+# Ever need want to check if the distant end of a satellite connection is masking equipment
 # problems as "weather problems"?
 #
-# This application is designed to display the current weather at your location + the current weather 
+# This application is designed to display the current weather at your location + the current weather
 # at a second location of your choosing (like for hub/spoke satellite sites, etc.). Leave this application
-# running in your COC and it also provides a helpful network checker to can inform you of significant 
-# network interruptions / issues.  
+# running in your COC and it also provides a helpful network checker to can inform you of significant
+# network interruptions / issues.
 #
-# In order to access the API that we use in this application, 
+# In order to access the API that we use in this application,
 # Browse to: https://openweathermap.org/api
 # Under the options, subscribe for the "Free Current Weather". Create an API key.
 # Add your key to the "api_key" variable below. Run this little application!
@@ -47,16 +47,70 @@ from PIL import ImageTk, Image
 #        json_url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=40.9369&lon=14.0334&altitude=15"
 #        page = requests.get(json_url)
 #        soup = BeautifulSoup(page.content, 'html.parser')
-
-class cityweather():
-    def __init__(self, current_city='Aqaba', sat_city='Lago Patria'):
+class LogFormatter(logging.Formatter):
+    """ Basic system log message generator to identify significant events and errors for troubleshooting """
+    def __init__(self, application_name="DJC2 20.2 'The Looters' Weather App"):
+        super().__init__()
+        self.application_name = application_name
+        self.start_time = datetime.datetime.today()
+        self.info_error_list = []
+        self.warn_error_list = []
         self.error_count = 0
+        handler = logging.handlers.SysLogHandler()
+        formatter = logging.Formatter('%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+        handler.setFormatter(formatter)
+        pdfscraper_log = logging.getLogger(__name__)
+        pdfscraper_log.setLevel(logging.DEBUG)
+        pdfscraper_log.addHandler(handler)
+
+    # Start with a log message identifying application initialization
+    def log_message_begin(self):
+        begin_message = f"Beginning: {self.application_name}, 'start_time'={self.start_time}, 'originating_process'={__name__};"
+        print(begin_message)
+        logging.info(begin_message)
+
+    # Logs errors at the specified Severity Level
+    def error_message(self, error, level=4):
+        error = f"{error}:{datetime.datetime.today()}"
+        self.info_error_list.append(error)
+        print(error)
+        if level == 1 or 'ALERT' or 'alert':
+            logging.alert(error)
+        elif level == 2 or 'CRITICAL' or 'critical':
+            logging.critical(error)
+        elif level == 3 or 'ERROR' or 'error':
+            logging.error(error)
+        elif level == 4 or 'WARN' or 'WARNING' or 'warn' or 'warning':
+            logging.warning(error)
+        elif level == 5 or 'NOTICE' or 'notice':
+            logging.notice(error)
+        elif level == 6 or 'INFO' or 'info':
+            logging.info(error)
+        elif level == 7 or 'DEBUG' or 'debug':
+            logging.debug(error)
+
+    # Identifies application completion and records the total number of errors encountered
+    def log_message_end(self):
+        self.end_time = datetime.datetime.today()
+        self.runtime = self.end_time - self.start_time
+        end_message = f"Ending: {self.application_name}, 'end_time'={self.end_time}, 'run_time'={self.runtime};"
+        print(end_message)
+        logging.info(end_message)
+
+    def log_message_errorsum(self):
+        errormessage = f"Sum of errors in {self.application_name}, 'total_error_count'={self.errorcount};"
+        logging.warning(errormessage)
+
+
+class cityweather(LogFormatter):
+    def __init__(self, current_city='Aqaba', sat_city='Lago Patria'):
+        super().__init__()
         self.init_counter = True
         self.sat_city = sat_city
         self.current_city = current_city
-        self.info_error_list = []
-        self.warn_error_list = []
-        self.button1, self.button2 = False
+        self.button1 = False
+        self.button2 = False
+        self.log_message_begin()
 
     def api_call(self, button1=False, button2=False):
         # API Call
@@ -95,7 +149,7 @@ class cityweather():
         # Satellite City Icon
         b = sat_api['weather']
         self.icon1 = [dict['icon'] for dict in b]
-        self.description1 = [dict['description'] for dict in b]
+        self.descrip1 = [dict['description'] for dict in b]
         self.icon_url1 = f"http://openweathermap.org/img/wn/{self.icon1}@2x.png"
 
         # Satellite City Coordinates
@@ -120,7 +174,7 @@ class cityweather():
         # Current City Icon
         y = cur_api['weather']
         self.icon2 = [dict['icon'] for dict in y]
-        self.description2 = [dict['description'] for dict in y]
+        self.descrip2 = [dict['description'] for dict in y]
         self.icon_url2 = f"http://openweathermap.org/img/wn/{self.icon2}@2x.png"
 
         # Current City Coordinates
@@ -194,13 +248,13 @@ class cityweather():
             hour1 = Label(root, text=dt.strftime('%I : %M %p'),
                          bg='white', font=("bold", 15))
             hour1.place(x=3, y=170)
-            
+
             # Weather Description
             lable_descrip1 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
             lable_descrip1.place(x=3, y=400)
             lable_descrip2 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
             lable_descrip2.place(x=((w/2)+3), y=400)
-            
+
             # Current Temperature
             lable_temp1 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
             lable_temp1.place(x=3, y=430)
@@ -311,13 +365,13 @@ class cityweather():
             #city_nameButton.update()
             #city_nameButton.invoke()
             #city_nameButton.flash()
-            
-            
+
+
             # Need to add a looping thread to conduct a 15 min sleep and then call the api for updated information
             # if self.button1 == True or self.button2 ==True:
             #     join()
             #     complete root loop
-            #     start sleep thread again 
+            #     start sleep thread again
             # else:
             #     call sleep thread again
             root.mainloop()
@@ -334,78 +388,29 @@ class cityweather():
             self.warn_error_list.append(f"{error}:{datetime.datetime.today()}")
             print(error)
             self.error_count += 1
-            
+
     def big_timer(self):
         # 15 min timer for updating weather info
         timer.sleep(900)
 
-        
-class LogFormatter(logging.Formatter, cityweather):
-    """ Basic system log message generator to identify significant events and errors for troubleshooting """
-    def __init__(self, application_name):
-        self.application_name = application_name
-        self.start_time = datetime.datetime.today()
-        handler = logging.handlers.SysLogHandler()
-        formatter = logging.Formatter('%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-        handler.setFormatter(formatter)
-        pdfscraper_log = logging.getLogger(__name__)
-        pdfscraper_log.setLevel(logging.DEBUG)
-        pdfscraper_log.addHandler(handler)
-
-    # Start with a log message identifying application initialization
-    def log_message_begin(self):
-        begin_message = f"Beginning {application_name}, 'start_time'={self.start_time}, 'originating_process'={__name__};"
-        print(begin_message)
-        logging.info(begin_message)
-
-    # Not a real-time solution, but logs errors once the application ends based on a list created by another object
-    def info_message(self, object):
-        for error in object.info_error_list
-            logging.info(error)
-
-    # Not a real-time solution, but logs errors once the application ends based on a list created by another object 
-    def warn_message(self, object):
-        for error in object.warn_error_list:
-            logging.warning(error)
-
-    # Identifies application completion and records the total number of errors encountered
-    def log_message_end(self, object):
-        if object.error_count > 0:
-            self.warn_message(object)
-            self.info_message(object)
-        self.end_time = datetime.datetime.today()
-        self.runtime = self.end_time - self.start_time
-        end_message = f"Ending {application_name}, 'end_time'={self.end_time}, 'run_time'={self.runtime};"
-        print(end_message)
-        logging.info(end_message)
-
-    def log_message_errorsum(self, errorcount):
-        errormessage = f"Sum of errors in {application_name}, 'total_error_count'={errorcount};"
-        logging.warning(errormessage)
+    def app_exit(self):
+        # Final log messages for recording completion and problems
+        if self.error_count > 0:
+            self.log_message_errorsum()
+            self.log_message_end()
+            exit(1)
+        else:
+            self.log_message_end()
+            exit(0)
 
 
 def main():
-    
-    # Log Object initialization
-    log_obj = LogFormatter(application_name="DJC2 20.2 'The Looters' Weather App")
-    log_obj.log_message_begin()
-    
     # Application initialization
     weatherapp = cityweather(current_city='Aqaba', sat_city='Lago Patria')
     weatherapp.app_setup()
-    
-    # Final log messages for recording completion and problems
-    log_obj.log_message_end(weatherapp)
-    if weatherapp.error_count > 0:
-        log_obj.log_message_errorsum(errorcount=weatherapp.error_count)
-        exit(1)
-    else:
-        exit(0)
+    weatherapp.app_exit()
 
 
 # Call the main function
 if __name__ == "__main__":
     main()
-
-
-
