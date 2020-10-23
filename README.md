@@ -1,5 +1,5 @@
 # weatherscraper
-Ever need want to check if the distant end of a satellite connection is masking equipment problems as "weather problems"? Ever need to onitor the current weather in two seperate locations?
+Ever need want to check if the distant end of a satellite connection is masking equipment problems as "weather problems"? Ever need to monitor the current weather in two separate locations?
 #
 This application is designed to display the current weather at your location + the current weather at a second location of your choosing (such as hub/spoke satellite sites, etc.). Leave this application running in your COC and it will also inform you of significant network interruptions / issues.  
 #
