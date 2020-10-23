@@ -152,6 +152,7 @@ class cityweather(LogFormatter):
                 city2_entry.insert(0, self.sat_city)
 
             def city_info():
+                utc = pytz.timezone('UTC')
                 # API Call
                 api_key = "x"
                 cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
@@ -181,17 +182,27 @@ class cityweather(LogFormatter):
                 longitude1 = x['lon']
                 latitude1 = x['lat']
 
+                # Current City
+                citi1 = cur_api['name']
+                print(f"trying {citi1}")
+
                 # Current City Country
                 v = cur_api['sys']
                 country1 = v['country']
                 cur_sunrise = v['sunrise']
-                cur_sunrise = datetime.datetime.utcfromtimestamp(cur_sunrise)
+                cur_sunrise = datetime.datetime.fromtimestamp(cur_sunrise)
+                cur_sunrise = utc.localize(cur_sunrise)
                 cur_sunset = v['sunset']
-                cur_sunset = datetime.datetime.utcfromtimestamp(cur_sunset)
+                cur_sunset = datetime.datetime.fromtimestamp(cur_sunset)
+                cur_sunset = utc.localize(cur_sunset)
 
                 # Current Timezone
                 cur_timeoffset = cur_api['timezone']
-                cur_zone = str(country_timezones(country1))[2:-2]
+                if len([country for country in country_timezones(country1) if (citi1 and country1 in country)]) > 1:
+                    list_comp = [country for country in country_timezones(country1) if (citi1 and country1 in country)]
+                    cur_zone = str(list_comp)[2:-2]
+                else:
+                    cur_zone = str(country_timezones(country1))[2:-2]
                 cur_zone = timezone(cur_zone)
                 print(cur_zone)
 
@@ -199,11 +210,11 @@ class cityweather(LogFormatter):
                 cur_dt = cur_api['dt']
                 print(cur_dt)
 
-                # Localize date
+                # Localize time to UTC and then convert to the appropriate time zone
+
                 cur_dt = datetime.datetime.fromtimestamp(cur_dt)
-                #cur_dt = cur_zone.localize(datetime(cur_dt))
-                print(cur_dt)
-                cur_dt = cur_dt.astimezone(cur_zone)
+                cur_utc_dt = utc.localize(cur_dt)
+                cur_dt = cur_utc_dt.astimezone(cur_zone)
                 print('now datecall')
                 # cur_dt = datetime.datetime.fromtimestamp(cur_dt)
                 # utc_datetime = datetime.datetime(cur_dt, tzinfo=datetime.timezone.utc)
@@ -213,13 +224,7 @@ class cityweather(LogFormatter):
 
                 #cur_dt = (cur_dt + datetime.timedelta(seconds=cur_timezone)).dst()
                 cur_date = cur_dt.strftime('%d %B, %Y')
-                cur_time = cur_dt.strftime('%I:%M %p')
-
-
-
-                # Current City
-                citi1 = cur_api['name']
-                print(f"trying {citi1}")
+                cur_time = cur_dt.strftime('%H:%M (%p)')
 
                 # Satellite City Temperatures
                 a = sat_api['main']
@@ -243,35 +248,38 @@ class cityweather(LogFormatter):
                 d = sat_api['sys']
                 country2 = d['country']
                 sat_sunrise = d['sunrise']
-                sat_sunrise = datetime.datetime.utcfromtimestamp(sat_sunrise)
+                sat_sunrise = datetime.datetime.fromtimestamp(sat_sunrise)
+                sat_sunrise = utc.localize(sat_sunrise)
                 sat_sunset = d['sunset']
-                sat_sunset = datetime.datetime.utcfromtimestamp(sat_sunset)
-
-                # Satellite Timezone
-                sat_timeoffset = sat_api['timezone']
-                print(sat_timeoffset)
-                for country in country_timezones(country2):
-                    for country2 in country:
-                        sat_zone = str(country_timezones(country2))[2:-2]
-                print(sat_zone)
-                sat_zone = pytz.timezone(sat_zone)
+                sat_sunset = datetime.datetime.fromtimestamp(sat_sunset)
+                sat_sunset = utc.localize(sat_sunset)
 
                 # Satellite City
                 citi2 = sat_api['name']
                 print(f"trying {citi2}")
 
+                # Satellite Timezone
+                sat_timeoffset = sat_api['timezone']
+                if len([country for country in country_timezones(country2) if (citi2 and country2 in country)]) > 1:
+                    list_comp = [country for country in country_timezones(country2) if (citi2 and country2 in country)]
+                    sat_zone = str(list_comp)[2:-2]
+                else:
+                    sat_zone = str(country_timezones(country2))[2:-2]
+                print(sat_zone)
+                sat_zone = timezone(sat_zone)
+
                 # Satellite Date
                 sat_dt = sat_api['dt']
                 sat_dt = datetime.datetime.fromtimestamp(sat_dt)
-                #cur_dt = cur_zone.localize(datetime(cur_dt))
-                print(sat_dt)
-                sat_dt = cur_dt.astimezone(sat_zone)
+                sat_utc_dt = utc.localize(sat_dt)
+                sat_dt = sat_utc_dt.astimezone(sat_zone)
+                sat_dt = sat_dt.astimezone(sat_zone)
                 # sat_dt = sat_zone.localize(datetime(sat_dt), is_dst=True)
                 # #sat_dt = (sat_dt + datetime.timedelta(seconds=sat_timezone)).dst()
                 # print(cur_dt)
                 print('now datecall')
                 sat_date = sat_dt.strftime('%d %B, %Y')
-                sat_time = sat_dt.strftime('%I:%M %p')
+                sat_time = sat_dt.strftime('%H:%M (%p)')
 
                 # Theme for current sun/rain status:
                 icon1_img = icon_url1
@@ -343,27 +351,31 @@ class cityweather(LogFormatter):
                 label_date2.configure(text=f"{sat_date}")
                 #label_icon2.configure(img={icon2_img})
 
-                # # Image application
-                # night = ImageTk.PhotoImage(Image.open('night.png'))
-                # day = ImageTk.PhotoImage(Image.open('day.png'))
-                # if cur_dt >= cur_sunrise:
-                #     if cur_dt <= cur_sunset:
-                #         print("day")
-                #         day_night = day
-                #     else:
-                #         cur_day_night_panel.configure(image=night)
-                # else:
-                #     cur_day_night_panel.configure(image=night)
-                # if sat_dt >= sat_sunrise:
-                #     if sat_dt <= sat_sunset:
-                #         sat_day_night_panel.configure(image=day)
-                #     else:
-                #         sat_day_night_panel.configure(image=night)
-                # else:
-                #     sat_day_night_panel.configure(image=night)
-                #
-                # cur_day_night_panel.configure(image=day_night)
-                # sat_day_night_panel.configure(image=day_night)
+                # Image application
+                night = ImageTk.PhotoImage(Image.open('night.png'))
+                day = ImageTk.PhotoImage(Image.open('day.png'))
+                if cur_utc_dt >= cur_sunrise:
+                    if cur_utc_dt <= cur_sunset:
+                        print("day")
+                        day_night1 = day
+                    else:
+                        print('night1')
+                        day_night1 = night
+                else:
+                    print('night2')
+                    day_night1 = night
+                if sat_utc_dt >= sat_sunrise:
+                    if sat_utc_dt <= sat_sunset:
+                        print('day')
+                        day_night2 = day
+                    else:
+                        print('night1')
+                        day_night2 = night
+                else:
+                    print('night2')
+                    day_night2 = night
+                cur_day_night_panel.image = day_night1
+                sat_day_night_panel.image = day_night2
 
 
             # Icon Placement
@@ -441,11 +453,10 @@ class cityweather(LogFormatter):
             city_nameButton2.grid(row=1, column=1, padx=1, stick=W+E+N+S)
 
             # Theme for the respective time the application is used
-            night = ImageTk.PhotoImage(Image.open('night.png'))
-            cur_day_night_panel = Label(weatherapp,  bg='white', image=night)
+            cur_day_night_panel = Label(weatherapp,  bg='white')
             cur_day_night_panel.place(x=3, y=240)
-            sat_day_night_panel = Label(weatherapp,  bg='white', image=night)
-            sat_day_night_panel.place(x=((self.w/2)+3), y=240)
+            sat_day_night_panel = Label(weatherapp,  bg='white')
+            sat_day_night_panel.place(x=((self.w / 2) + 3), y=240)
 
 
             # Call for default values on application initialization
@@ -455,6 +466,10 @@ class cityweather(LogFormatter):
 
             # Set the init-counter to False for future use
             self.init_counter = False
+
+
+
+
             # Need to add a looping thread to conduct a 15 min sleep and then call the api for updated information
             # if button1 == True or button2 ==True:
             #     join()
@@ -462,6 +477,7 @@ class cityweather(LogFormatter):
             #     start sleep thread again
             # else:
             #     call sleep thread again
+
             weatherapp.mainloop()
 
         except ConnectionError as error:
