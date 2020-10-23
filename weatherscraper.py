@@ -79,17 +79,15 @@ class LogFormatter(logging.Formatter):
         error = {f"'error':{error}", f"'time':{current_time}", f"'severity':{level}"}
         self.error_list.append(error)
         print(error)
-        if level == (2 or 'CRITICAL' or 'critical'):
+        if level == (5 or 'CRITICAL' or 'critical'):
             logging.critical(error)
-        elif level == (3 or 'ERROR' or 'error'):
+        elif level == (4 or 'ERROR' or 'error'):
             logging.error(error)
-        elif level == (4 or 'WARN' or 'WARNING' or 'warn' or 'warning'):
+        elif level == (3 or 'WARN' or 'WARNING' or 'warn' or 'warning'):
             logging.warning(error)
-        elif level == (5 or 'NOTICE' or 'notice'):
-            logging.notice(error)
-        elif level == (6 or 'INFO' or 'info'):
+        elif level == (2 or 'INFO' or 'info'):
             logging.info(error)
-        elif level == (7 or 'DEBUG' or 'debug'):
+        elif level == (1 or 'DEBUG' or 'debug'):
             logging.debug(error)
 
     def log_message_errorsum(self):
