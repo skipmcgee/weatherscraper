@@ -34,6 +34,8 @@ import requests
 import json
 import datetime
 from PIL import ImageTk, Image
+import pytz
+from pytz import country_timezones, timezone
 
 # <script src="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/external_box_hour_by_hour.js"></script><noscript><a href="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/">yr.no: Forecast for Lago di Patria</a></noscript>
 
@@ -108,7 +110,7 @@ class LogFormatter(logging.Formatter):
 
 
 class cityweather(LogFormatter):
-    def __init__(self):
+    def __init__(self, current_city="Aqaba", sat_city="Lago Patria"):
         super().__init__()
         self.init_counter = True
         self.button1 = False
@@ -116,7 +118,8 @@ class cityweather(LogFormatter):
         self.log_message_begin()
         self.w = 500
         self.l = 580
-
+        self.current_city = current_city
+        self.sat_city = sat_city
 
     def big_timer(self):
         # 15 min timer for updating weather info
@@ -125,43 +128,42 @@ class cityweather(LogFormatter):
 
     def app_setup(self, button1=False, button2=False):
         try:
-            root = Tk()
-            root.title("DJC2 20.2 'The Looters' Weather App")
-            root.geometry(f"{self.w}x{self.l}")
-            root['background'] = "white"
+            weatherapp = Tk()
+            weatherapp.title("DJC2 20.2 'The Looters' Weather App")
+            weatherapp.geometry(f"{self.w}x{self.l}")
+            weatherapp['background'] = "white"
 
             # TF 51/1 Logo Image
             logo = ImageTk.PhotoImage(Image.open('logo.png'))
-            panel = Label(root, bg='white', image=logo)
+            panel = Label(weatherapp, bg='white', image=logo)
             panel.place(x=410, y=230)
 
             # Current City Search
             city1_name = StringVar()
-            city1_entry = Entry(root, textvariable=city1_name, width=63)
+            city1_entry = Entry(weatherapp, textvariable=city1_name, width=63)
             city1_entry.grid(row=0, column=0, ipady=10, sticky=W+E+N+S)
 
 
             # Sat City Search
             city2_name = StringVar()
-            city2_entry = Entry(root, textvariable=city2_name, width=63)
+            city2_entry = Entry(weatherapp, textvariable=city2_name, width=63)
             city2_entry.grid(row=1, column=0, ipady=10, sticky=W+E+N+S)
 
             if self.init_counter == True:
-                city1_entry.insert(0, "Aqaba")
-                city1_entry.get()
-                city2_entry.insert(0, "Lago Patria")
-                city2_entry.get()
+                city1_entry.insert(0, self.current_city)
+                city2_entry.insert(0, self.sat_city)
 
             def city_info():
                 # API Call
                 api_key = "x"
-
                 cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                                     + city1_entry.get() + "&units=imperial&appid=" + api_key)
                 cur_api = json.loads(cur_api_request.content)
                 sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
-                                                    + city2_entry.get() + "&units=imperial&appid=" + api_key)
+                                                + city2_entry.get() + "&units=imperial&appid=" + api_key)
                 sat_api = json.loads(sat_api_request.content)
+                print(cur_api)
+                print(sat_api)
 
                 # Current City Temperatures
                 z = cur_api['main']
@@ -184,6 +186,38 @@ class cityweather(LogFormatter):
                 # Current City Country
                 v = cur_api['sys']
                 country1 = v['country']
+                cur_sunrise = v['sunrise']
+                cur_sunrise = datetime.datetime.utcfromtimestamp(cur_sunrise)
+                cur_sunset = v['sunset']
+                cur_sunset = datetime.datetime.utcfromtimestamp(cur_sunset)
+
+                # Current Timezone
+                cur_timeoffset = cur_api['timezone']
+                cur_zone = str(country_timezones(country1))[2:-2]
+                cur_zone = timezone(cur_zone)
+                print(cur_zone)
+
+                # Current Date
+                cur_dt = cur_api['dt']
+                print(cur_dt)
+
+                # Localize date
+                cur_dt = datetime.datetime.fromtimestamp(cur_dt)
+                #cur_dt = cur_zone.localize(datetime(cur_dt))
+                print(cur_dt)
+                cur_dt = cur_dt.astimezone(cur_zone)
+                print('now datecall')
+                # cur_dt = datetime.datetime.fromtimestamp(cur_dt)
+                # utc_datetime = datetime.datetime(cur_dt, tzinfo=datetime.timezone.utc)
+                # local_datetime = utc_datetime.replace(tzinfo=pytz.utc)
+                # cur_dt = local_datetime.astimezone(cur_zone)
+                #print(local_datetime)
+
+                #cur_dt = (cur_dt + datetime.timedelta(seconds=cur_timezone)).dst()
+                cur_date = cur_dt.strftime('%d %B, %Y')
+                cur_time = cur_dt.strftime('%I:%M %p')
+
+
 
                 # Current City
                 citi1 = cur_api['name']
@@ -210,10 +244,36 @@ class cityweather(LogFormatter):
                 # Satellite City Country
                 d = sat_api['sys']
                 country2 = d['country']
+                sat_sunrise = d['sunrise']
+                sat_sunrise = datetime.datetime.utcfromtimestamp(sat_sunrise)
+                sat_sunset = d['sunset']
+                sat_sunset = datetime.datetime.utcfromtimestamp(sat_sunset)
+
+                # Satellite Timezone
+                sat_timeoffset = sat_api['timezone']
+                print(sat_timeoffset)
+                for country in country_timezones(country2):
+                    for country2 in country:
+                        sat_zone = str(country_timezones(country2))[2:-2]
+                print(sat_zone)
+                sat_zone = pytz.timezone(sat_zone)
 
                 # Satellite City
                 citi2 = sat_api['name']
                 print(f"trying {citi2}")
+
+                # Satellite Date
+                sat_dt = sat_api['dt']
+                sat_dt = datetime.datetime.fromtimestamp(sat_dt)
+                #cur_dt = cur_zone.localize(datetime(cur_dt))
+                print(sat_dt)
+                sat_dt = cur_dt.astimezone(sat_zone)
+                # sat_dt = sat_zone.localize(datetime(sat_dt), is_dst=True)
+                # #sat_dt = (sat_dt + datetime.timedelta(seconds=sat_timezone)).dst()
+                # print(cur_dt)
+                print('now datecall')
+                sat_date = sat_dt.strftime('%d %B, %Y')
+                sat_time = sat_dt.strftime('%I:%M %p')
 
                 # Theme for current sun/rain status:
                 icon1_img = icon_url1
@@ -252,11 +312,11 @@ class cityweather(LogFormatter):
                 #     if src:
                 #         src = src.groups()
                 #         img = ImageTk.PhotoImage(Image.open(src))
-                #         panel = Label(root, image=img)
+                #         panel = Label(weatherapp, image=img)
                 #         panel.place(x=1, y=200)
                 #     else:
                 #         img = ImageTk.PhotoImage(Image.open('img_notfound.png'))
-                #         panel = Label(root, image=img)
+                #         panel = Label(weatherapp, image=img)
                 #         panel.place(x=1, y=200)
 
 
@@ -269,6 +329,8 @@ class cityweather(LogFormatter):
                 label_lat1.configure(text=f"Latitude: {latitude1}")
                 label_citi1.configure(text=f"Current: {citi1}, {country1}")
                 label_descrip1.configure(text=f"Weather: {descrip1}")
+                label_time1.configure(text=f"Time: {cur_time}")
+                label_date1.configure(text=f"{cur_date}")
                 #label_icon1.configure(img={icon1_img})
 
                 label_temp2.configure(text=f"Temperature: {current_temperature2}" + '\u00b0')
@@ -279,104 +341,130 @@ class cityweather(LogFormatter):
                 label_lat2.configure(text=f"Latitude: {latitude2}")
                 label_citi2.configure(text=f"Dist. Loc: {citi2}, {country2}")
                 label_descrip2.configure(text=f"Weather: {descrip2}")
+                label_time2.configure(text=f"Time: {sat_time}")
+                label_date2.configure(text=f"{sat_date}")
                 #label_icon2.configure(img={icon2_img})
+
+                # # Image application
+                # night = ImageTk.PhotoImage(Image.open('night.png'))
+                # day = ImageTk.PhotoImage(Image.open('day.png'))
+                # if cur_dt >= cur_sunrise:
+                #     if cur_dt <= cur_sunset:
+                #         print("day")
+                #         day_night = day
+                #     else:
+                #         cur_day_night_panel.configure(image=night)
+                # else:
+                #     cur_day_night_panel.configure(image=night)
+                # if sat_dt >= sat_sunrise:
+                #     if sat_dt <= sat_sunset:
+                #         sat_day_night_panel.configure(image=day)
+                #     else:
+                #         sat_day_night_panel.configure(image=night)
+                # else:
+                #     sat_day_night_panel.configure(image=night)
+                #
+                # cur_day_night_panel.configure(image=day_night)
+                # sat_day_night_panel.configure(image=day_night)
 
 
             # Icon Placement
-            label_icon1 = Label(root, width=0, bg='white', font=("bold", 15))
+            label_icon1 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
             label_icon1.place(x=3, y=170)
-            label_icon2 = Label(root, width=0, bg='white', font=("bold", 15))
+            label_icon2 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
             label_icon2.place(x=((self.w/2)+3), y=170)
 
             # Country Names and Coordinates
-            label_citi1 = Label(root, width=0, bg='white', font=("bold", 15))
+            label_citi1 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
             label_citi1.place(x=3, y=80)
-            label_citi2 = Label(root, width=0, bg='white', font=("bold", 15))
+            label_citi2 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
             label_citi2.place(x=((self.w/2)+3), y=80)
 
-            label_lat1 = Label(root, width=0, bg='white', font=("Helvetica", 15))
+            label_lat1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
             label_lat1.place(x=3, y=110)
-            label_lat2 = Label(root, width=0, bg='white', font=("Helvetica", 15))
+            label_lat2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
             label_lat2.place(x=((self.w/2)+3), y=110)
 
-            label_lon1 = Label(root, width=0, bg='white', font=("Helvetica", 15))
+            label_lon1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
             label_lon1.place(x=3, y=140)
-            label_lon2 = Label(root, width=0, bg='white', font=("Helvetica", 15))
+            label_lon2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
             label_lon2.place(x=((self.w/2)+3), y=140)
 
             # Dates
-            dt = datetime.datetime.now()
-            date1 = Label(root, text=dt.strftime('%A, %C %B, %Y'), bg='white', font=("bold", 15))
-            date1.place(x=3, y=200)
+            label_date1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_date1.place(x=3, y=200)
+            label_date2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_date2.place(x=((self.w/2)+3), y=200)
 
             # Time
-            time1 = Label(root, text=dt.strftime('Time: %I : %M %p'),
-                         bg='white', font=("bold", 15))
-            time1.place(x=3, y=170)
+            label_time1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_time1.place(x=3, y=170)
+            label_time2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_time2.place(x=((self.w/2)+3), y=170)
 
             # Weather Description
-            label_descrip1 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
+            label_descrip1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("bold", 15))
             label_descrip1.place(x=3, y=400)
-            label_descrip2 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
+            label_descrip2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("bold", 15))
             label_descrip2.place(x=((self.w/2)+3), y=400)
 
             # Current Temperature
-            label_temp1 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
+            label_temp1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("bold", 15))
             label_temp1.place(x=3, y=430)
-            label_temp2 = Label(root, text="ERROR", width=0, bg='white', font=("bold", 15))
+            label_temp2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("bold", 15))
             label_temp2.place(x=((self.w/2)+3), y=430)
 
             # Humidity
-            label_humidity1 = Label(root, width=0,bg='white', font=("bold", 15))
+            label_humidity1 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
             label_humidity1.place(x=3, y=460)
-            label_humidity2 = Label(root, width=0,bg='white', font=("bold", 15))
+            label_humidity2 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
             label_humidity2.place(x=((self.w/2)+3), y=460)
 
             # Max Temperature
-            max_temp1 = Label(root, width=0, bg='white', font=("bold", 15))
+            max_temp1 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
             max_temp1.place(x=3, y=490)
-            max_temp2 = Label(root, width=0, bg='white', font=("bold", 15))
+            max_temp2 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
             max_temp2.place(x=((self.w/2)+3), y=490)
 
             # Min Temperature
-            min_temp1 = Label(root, width=0, bg='white', font=("bold", 15))
+            min_temp1 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
             min_temp1.place(x=3, y=520)
-            min_temp2 = Label(root, width=0, bg='white', font=("bold", 15))
+            min_temp2 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
             min_temp2.place(x=((self.w/2)+3), y=520)
 
             # Note
-            note = Label(root, text="All temperatures in degrees Fahrenheit", bg='white', font=("italic", 10))
+            note = Label(weatherapp, text="All temperatures in degrees Fahrenheit", bg='white', font=("italic", 10))
             note.place(x=120, y=550)
 
+            # Search Button
+            city_nameButton1 = Button(weatherapp, text="Update Current City", command=city_info)
+            city_nameButton1.grid(row=0, column=1, padx=1, stick=W+E+N+S)
+            city_nameButton2 = Button(weatherapp, text="Update Dist. City", command=city_info)
+            city_nameButton2.grid(row=1, column=1, padx=1, stick=W+E+N+S)
 
             # Theme for the respective time the application is used
             night = ImageTk.PhotoImage(Image.open('night.png'))
-            day = ImageTk.PhotoImage(Image.open('day.png'))
-            if int((dt.strftime('%H'))) >= 20:
-               panel = Label(root, image=night)
-               panel.place(x=3, y=240)
-            elif int((dt.strftime('%H'))) <= 7:
-               panel = Label(root, image=night)
-               panel.place(x=3, y=240)
-            else:
-               panel = Label(root, image=day)
-               panel.place(x=3, y=240)
+            cur_day_night_panel = Label(weatherapp,  bg='white', image=night)
+            cur_day_night_panel.place(x=3, y=240)
+            sat_day_night_panel = Label(weatherapp,  bg='white', image=night)
+            sat_day_night_panel.place(x=((self.w/2)+3), y=240)
 
-            # Search Button
-            city_nameButton1 = Button(root, text="Update Current City", command=city_info)
-            city_nameButton1.grid(row=0, column=1, padx=1, stick=W+E+N+S)
-            city_nameButton2 = Button(root, text="Update Dist. City", command=city_info)
-            city_nameButton2.grid(row=1, column=1, padx=1, stick=W+E+N+S)
 
+            # Call for default values on application initialization
+            if self.init_counter == True:
+                city_info()
+
+
+            # Set the init-counter to False for future use
             self.init_counter = False
             # Need to add a looping thread to conduct a 15 min sleep and then call the api for updated information
             # if button1 == True or button2 ==True:
             #     join()
-            #     complete root loop
+            #     complete weatherapp loop
             #     start sleep thread again
             # else:
             #     call sleep thread again
-            root.mainloop()
+            weatherapp.mainloop()
 
         except ConnectionError as error:
             error = error
