@@ -8,3 +8,5 @@ In order to access the API utilized in this application:
 -Under the options, subscribe for the "Free Current Weather". Create an API key.
 -Add your key to the "api_key" variable below. Run this little application!
 (Note: If you aren't a DJC2 20.2 "Looter", you might want to consider changing the application name, logo and default locations.)
+#
+Requires Python >3.6
