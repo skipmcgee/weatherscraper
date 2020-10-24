@@ -290,13 +290,13 @@ class cityweather(LogFormatter):
                     except:
                         pass
                     try:
-                        print(f'searching for {sat_countryname}')
-                        sat_firstchoice += [listitem for listitem in sat_offset_matches if sat_countryname in listitem]
+                        print(f'searching for {country2}')
+                        sat_firstchoice += [listitem for listitem in sat_offset_matches if country2 in listitem]
                     except:
                         pass
                     try:
-                        print(f'searching for {country2}')
-                        sat_firstchoice += [listitem for listitem in sat_offset_matches if country2 in listitem]
+                        print(f'searching for {sat_countryname}')
+                        sat_firstchoice += [listitem for listitem in sat_offset_matches if sat_countryname in listitem]
                     except:
                         pass
                     if len(sat_firstchoice) == 0:
