@@ -35,7 +35,7 @@ import json
 import datetime
 from PIL import ImageTk, Image
 import pytz
-from pytz import country_timezones, timezone
+from pycountry_convert import country_alpha2_to_country_name
 
 # <script src="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/external_box_hour_by_hour.js"></script><noscript><a href="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/">yr.no: Forecast for Lago di Patria</a></noscript>
 
@@ -108,7 +108,7 @@ class LogFormatter(logging.Formatter):
 
 
 class cityweather(LogFormatter):
-    def __init__(self, current_city="Aqaba", sat_city="Lago Patria"):
+    def __init__(self, current_city="Aqaba, JO", sat_city="Lago Patria, IT"):
         super().__init__()
         self.init_counter = True
         self.button1 = False
@@ -198,11 +198,33 @@ class cityweather(LogFormatter):
 
                 # Current Timezone
                 cur_timeoffset = cur_api['timezone']
-                if len([country for country in country_timezones(country1) if (citi1 and country1 in country)]) > 1:
-                    list_comp = [country for country in country_timezones(country1) if (citi1 and country1 in country)]
-                    cur_zone = str(list_comp)[2:-2]
+                cur_timeoffset = datetime.timedelta(seconds=cur_timeoffset)
+                now = datetime.datetime.now(pytz.utc)
+                cur_countryname = country_alpha2_to_country_name(country1)
+                cur_offset_matches = [tz.zone for tz in map(timezone, pytz.all_timezones_set) if now.astimezone(tz).utcoffset() == cur_timeoffset]
+                print(cur_offset_matches)
+                if len(cur_offset_matches) > 1:
+                    for listitem in cur_offset_matches:
+                        if citi1 in listitem:
+                            print('trying citi1')
+                            firstchoice = [listitem for listitem in cur_offset_matches][0:1]
+                            print(firstchoice)
+                        elif cur_countryname in listitem:
+                            print('trying country1')
+                            secondchoice = [listitem for listitem in cur_offset_matches][0:1]
+                            firstchoice = [listitem for listitem in secondchoice if citi1 in listitem][0:1]
+                            print(secondchoice)
+                            print(firstchoice)
+                        else:
+                            print('trying else1')
+                            print(cur_offset_matches)
+                            firstchoice = cur_offset_matches[0:1]
+                            print(firstchoice)
+                        print(firstchoice)
+                        cur_zone = str(firstchoice)[2:-2]
                 else:
-                    cur_zone = str(country_timezones(country1))[2:-2]
+                    cur_zone = str(cur_offset_matches)[2:-2]
+                print(cur_zone)
                 cur_zone = timezone(cur_zone)
                 print(cur_zone)
 
@@ -260,11 +282,32 @@ class cityweather(LogFormatter):
 
                 # Satellite Timezone
                 sat_timeoffset = sat_api['timezone']
-                if len([country for country in country_timezones(country2) if (citi2 and country2 in country)]) > 1:
-                    list_comp = [country for country in country_timezones(country2) if (citi2 and country2 in country)]
-                    sat_zone = str(list_comp)[2:-2]
+                sat_timeoffset = datetime.timedelta(seconds=sat_timeoffset)
+                now = datetime.datetime.now(pytz.utc)
+                sat_countryname = country_alpha2_to_country_name(country2)
+                sat_offset_matches = [tz.zone for tz in map(timezone, pytz.all_timezones_set) if now.astimezone(tz).utcoffset() == sat_timeoffset]
+                print(sat_offset_matches)
+                if len(sat_offset_matches) > 1:
+                    for listitem in sat_offset_matches:
+                        if citi2 in listitem:
+                            print('trying citi2')
+                            firstchoice = [listitem for listitem in sat_offset_matches][0:1]
+                            print(firstchoice)
+                        elif sat_countryname in listitem:
+                            print('trying country2')
+                            secondchoice = [listitem for listitem in sat_offset_matches][0:1]
+                            firstchoice = [listitem for listitem in secondchoice if citi2 in listitem][0:1]
+                            print(secondchoice)
+                            print(firstchoice)
+                        else:
+                            print('trying else2')
+                            print(sat_offset_matches)
+                            firstchoice = sat_offset_matches[0:1]
+                            print(firstchoice)
+                        print(firstchoice)
+                        sat_zone = str(firstchoice)[2:-2]
                 else:
-                    sat_zone = str(country_timezones(country2))[2:-2]
+                    sat_zone = str(sat_offset_matches)[2:-2]
                 print(sat_zone)
                 sat_zone = timezone(sat_zone)
 
@@ -447,9 +490,9 @@ class cityweather(LogFormatter):
             note.place(x=120, y=550)
 
             # Search Button
-            city_nameButton1 = Button(weatherapp, text="Update Current City", command=city_info)
+            city_nameButton1 = Button(weatherapp, text="Current Location", command=city_info)
             city_nameButton1.grid(row=0, column=1, padx=1, stick=W+E+N+S)
-            city_nameButton2 = Button(weatherapp, text="Update Dist. City", command=city_info)
+            city_nameButton2 = Button(weatherapp, text="Dist. Location", command=city_info)
             city_nameButton2.grid(row=1, column=1, padx=1, stick=W+E+N+S)
 
             # Theme for the respective time the application is used
