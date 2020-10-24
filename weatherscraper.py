@@ -18,6 +18,8 @@
 # Add your key to the "api_key" variable below. Run this little application!
 # (Note: If not a "Looter", you could consider changing the application name, logo and default locations.)
 #
+# This application requires a version of Python > 3.6.0.
+#
 # Other Useful weather URLs:
 # hourly_forecast_url = "https://weather.com/weather/hourbyhour/l/bd6e61a96a73fe700823357bc4695a0342074429b43fdbee1202ed754b361eee"
 # json_api_url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=40.9369&lon=14.0334&altitude=15"
