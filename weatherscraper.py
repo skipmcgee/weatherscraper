@@ -114,14 +114,14 @@ class cityweather(LogFormatter):
         self.button1 = False
         self.button2 = False
         self.log_message_begin()
-        self.w = 500
+        self.w = 460
         self.l = 580
         self.current_city = current_city
         self.sat_city = sat_city
 
     def big_timer(self):
         # 15 min timer for updating weather info
-        timer.sleep(900)
+        time.sleep(900)
 
 
     def app_setup(self, button1=False, button2=False):
@@ -134,18 +134,24 @@ class cityweather(LogFormatter):
             # TF 51/1 Logo Image
             logo = ImageTk.PhotoImage(Image.open('logo.png'))
             panel = Label(weatherapp, bg='white', image=logo)
-            panel.place(x=410, y=230)
+            panel.place(x=(self.w/2)-50, y=(self.l/2)-30)
+
+            # Labels for Entry Fields
+            textlabel1 = Label(weatherapp, font=("Helvetica", 15), justify="left", bg="light gray", text="Current Location")
+            textlabel2 = Label(weatherapp, font=("Helvetica", 15), justify="left", bg="light gray",text="Distant Location")
+            textlabel1.grid(row=0, column=0, sticky=W+E+N+S)
+            textlabel2.grid(row=1, column=0, sticky=W+E+N+S)
 
             # Current City Search
             city1_name = StringVar()
-            city1_entry = Entry(weatherapp, textvariable=city1_name, width=63)
-            city1_entry.grid(row=0, column=0, ipady=10, sticky=W+E+N+S)
+            city1_entry = Entry(weatherapp, font=("Helvetica", 15), justify="left", bg="white", fg='gray', textvariable=city1_name, width=30)
+            city1_entry.grid(row=0, column=1, ipadx=0, ipady=4, sticky=N+W)
 
 
             # Sat City Search
             city2_name = StringVar()
-            city2_entry = Entry(weatherapp, textvariable=city2_name, width=63)
-            city2_entry.grid(row=1, column=0, ipady=10, sticky=W+E+N+S)
+            city2_entry = Entry(weatherapp, font=("Helvetica", 15), justify="left", bg="white", fg='gray', textvariable=city2_name, width=30)
+            city2_entry.grid(row=1, column=1, ipadx=0, ipady=4, sticky=W+N)
 
             if self.init_counter == True:
                 city1_entry.insert(0, self.current_city)
@@ -154,7 +160,7 @@ class cityweather(LogFormatter):
             def city_info():
                 utc = pytz.timezone('UTC')
                 # API Call
-                api_key = ""
+                api_key = "x"
                 cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                                     + city1_entry.get() + "&units=imperial&appid=" + api_key)
                 cur_api = json.loads(cur_api_request.content)
@@ -360,11 +366,11 @@ class cityweather(LogFormatter):
                 label_humidity1.configure(text=f"Humidity: {humidity1}%")
                 max_temp1.configure(text="Max Temp Today: " + f"{tempmax1}" + '\u00b0')
                 min_temp1.configure(text=f"Min Temp Today: {tempmin1}\u00b0")
-                label_lon1.configure(text=f"Longitude: {longitude1}")
-                label_lat1.configure(text=f"Latitude: {latitude1}")
+                label_lon1.configure(text=f"Longitude: {longitude1}" + '\u00b0')
+                label_lat1.configure(text=f"Latitude: {latitude1}"+ '\u00b0')
                 label_citi1.configure(text=f"Current: {citi1}, {country1}")
                 label_descrip1.configure(text=f"Weather: {descrip1}")
-                label_time1.configure(text=f"Time: {cur_time}")
+                label_time1.configure(text=f"Time: {cur_time} L")
                 label_date1.configure(text=f"{cur_date}")
                 #label_icon1.configure(img={icon1_img})
 
@@ -372,11 +378,11 @@ class cityweather(LogFormatter):
                 label_humidity2.configure(text=f"Humidity: {humidity2}%")
                 max_temp2.configure(text="Max Temp Today: " + f"{tempmax2}" + '\u00b0')
                 min_temp2.configure(text=f"Min Temp Today: {tempmin2}\u00b0")
-                label_lon2.configure(text=f"Longitude: {longitude2}")
-                label_lat2.configure(text=f"Latitude: {latitude2}")
-                label_citi2.configure(text=f"Dist. Loc: {citi2}, {country2}")
+                label_lon2.configure(text=f"Longitude: {longitude2}"+ '\u00b0')
+                label_lat2.configure(text=f"Latitude: {latitude2}"+ '\u00b0')
+                label_citi2.configure(text=f"Distant: {citi2}, {country2}")
                 label_descrip2.configure(text=f"Weather: {descrip2}")
-                label_time2.configure(text=f"Time: {sat_time}")
+                label_time2.configure(text=f"Time: {sat_time} L")
                 label_date2.configure(text=f"{sat_date}")
                 #label_icon2.configure(img={icon2_img})
 
@@ -442,33 +448,33 @@ class cityweather(LogFormatter):
             label_time2.place(x=((self.w/2)+3), y=170)
 
             # Weather Description
-            label_descrip1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("bold", 15))
+            label_descrip1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 15))
             label_descrip1.place(x=3, y=400)
-            label_descrip2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("bold", 15))
+            label_descrip2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 15))
             label_descrip2.place(x=((self.w/2)+3), y=400)
 
             # Current Temperature
-            label_temp1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("bold", 15))
+            label_temp1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 15))
             label_temp1.place(x=3, y=430)
-            label_temp2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("bold", 15))
+            label_temp2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 15))
             label_temp2.place(x=((self.w/2)+3), y=430)
 
             # Humidity
-            label_humidity1 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
+            label_humidity1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
             label_humidity1.place(x=3, y=460)
-            label_humidity2 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
+            label_humidity2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
             label_humidity2.place(x=((self.w/2)+3), y=460)
 
             # Max Temperature
-            max_temp1 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
+            max_temp1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
             max_temp1.place(x=3, y=490)
-            max_temp2 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
+            max_temp2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
             max_temp2.place(x=((self.w/2)+3), y=490)
 
             # Min Temperature
-            min_temp1 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
+            min_temp1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
             min_temp1.place(x=3, y=520)
-            min_temp2 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
+            min_temp2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
             min_temp2.place(x=((self.w/2)+3), y=520)
 
             # Note
@@ -476,10 +482,10 @@ class cityweather(LogFormatter):
             note.place(x=120, y=550)
 
             # Search Button
-            city_nameButton1 = Button(weatherapp, text="Current Location", command=city_info)
-            city_nameButton1.grid(row=0, column=1, padx=1, stick=W+E+N+S)
-            city_nameButton2 = Button(weatherapp, text="Dist. Location", command=city_info)
-            city_nameButton2.grid(row=1, column=1, padx=1, stick=W+E+N+S)
+            city_nameButton1 = Button(weatherapp, font=("Helvetica", 15), text="Search", command=city_info)
+            city_nameButton1.grid(row=0, column=2, padx=0, pady=0, sticky=W+E+N+S)
+            city_nameButton2 = Button(weatherapp, font=("Helvetica", 15), text="Search", command=city_info)
+            city_nameButton2.grid(row=1, column=2, padx=0, pady=0, sticky=W+E+N+S)
 
             # Theme for the respective time the application is used
             cur_day_night_panel = Label(weatherapp,  bg='white')
