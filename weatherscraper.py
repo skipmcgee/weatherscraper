@@ -137,8 +137,8 @@ class cityweather(LogFormatter):
             panel.place(x=(self.w/2)-50, y=(self.l/2)-30)
 
             # Labels for Entry Fields
-            textlabel1 = Label(weatherapp, font=("Helvetica", 15), justify="left", bg="light gray", text="Current Location")
-            textlabel2 = Label(weatherapp, font=("Helvetica", 15), justify="left", bg="light gray",text="Distant Location")
+            textlabel1 = Label(weatherapp, font=("Helvetica", 15), justify="left", bg="light gray", text="Current Location:")
+            textlabel2 = Label(weatherapp, font=("Helvetica", 15), justify="left", bg="light gray",text="Distant Location:")
             textlabel1.grid(row=0, column=0, sticky=W+E+N+S)
             textlabel2.grid(row=1, column=0, sticky=W+E+N+S)
 
