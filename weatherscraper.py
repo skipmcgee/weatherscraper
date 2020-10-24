@@ -106,11 +106,12 @@ class LogFormatter(logging.Formatter):
         logging.info(self.log_message_errorsum)
         logging.info(end_message)
 
-
+##### Division between Classes identified for increased visibility when editing
 
 
 class cityweather(LogFormatter):
     def __init__(self, current_city="Aqaba, JO", sat_city="Lago Patria, IT"):
+        """ Need to really work on the documentation of this app one day """
         super().__init__()
         self.init_counter = True
         self.button1 = False
@@ -191,7 +192,7 @@ class cityweather(LogFormatter):
                 # Current City
                 citi1 = cur_api['name']
 
-                # Current City Country
+                # Current City Country & daylight information
                 v = cur_api['sys']
                 country1 = v['country']
                 cur_sunrise = v['sunrise']
@@ -201,7 +202,7 @@ class cityweather(LogFormatter):
                 cur_sunset = datetime.datetime.fromtimestamp(cur_sunset)
                 cur_sunset = utc.localize(cur_sunset)
 
-                # Current Timezone
+                # Current Timezone via offset and dict search
                 cur_timeoffset = cur_api['timezone']
                 cur_timeoffset = datetime.timedelta(seconds=cur_timeoffset)
                 cur_now = datetime.datetime.now(pytz.utc)
@@ -238,7 +239,7 @@ class cityweather(LogFormatter):
                 # Current Date
                 cur_dt = cur_api['dt']
 
-                # Localize time to UTC and then convert to the appropriate time zone
+                # Current Date & Time converted from UNIX timestamp to UTC and then to Local
                 cur_dt = datetime.datetime.fromtimestamp(cur_dt)
                 cur_utc_dt = cur_dt.astimezone(utc)
                 cur_dt = cur_utc_dt.astimezone(cur_zone)
@@ -263,7 +264,7 @@ class cityweather(LogFormatter):
                 longitude2 = c['lon']
                 latitude2 = c['lat']
 
-                # Satellite City Country
+                # Satellite City Country & daylight information
                 d = sat_api['sys']
                 country2 = d['country']
                 sat_sunrise = d['sunrise']
@@ -276,7 +277,7 @@ class cityweather(LogFormatter):
                 # Satellite City
                 citi2 = sat_api['name']
 
-                # Satellite Timezone
+                # Satellite Timezone via offset and dict search
                 sat_timeoffset = sat_api['timezone']
                 sat_timeoffset = datetime.timedelta(seconds=sat_timeoffset)
                 sat_now = datetime.datetime.now(pytz.utc)
@@ -310,7 +311,7 @@ class cityweather(LogFormatter):
                     sat_zone = ''.join(sat_offset_matches)
                 sat_zone = pytz.timezone(sat_zone)
 
-                # Satellite Date
+                # Satellite Date & Time converted from UNIX timestamp to UTC and then to Local
                 sat_dt = sat_api['dt']
                 sat_dt = datetime.datetime.fromtimestamp(sat_dt)
                 sat_utc_dt = sat_dt.astimezone(utc)
