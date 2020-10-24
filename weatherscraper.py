@@ -154,15 +154,13 @@ class cityweather(LogFormatter):
             def city_info():
                 utc = pytz.timezone('UTC')
                 # API Call
-                api_key = "x"
+                api_key = ""
                 cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                                     + city1_entry.get() + "&units=imperial&appid=" + api_key)
                 cur_api = json.loads(cur_api_request.content)
                 sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                                 + city2_entry.get() + "&units=imperial&appid=" + api_key)
                 sat_api = json.loads(sat_api_request.content)
-                print(cur_api)
-                print(sat_api)
 
                 # Current City Temperatures
                 z = cur_api['main']
@@ -174,7 +172,7 @@ class cityweather(LogFormatter):
                 # Current City Icon
                 y = cur_api['weather']
                 icon1 = [dict['icon'] for dict in y]
-                descrip1 = str([dict['description'] for dict in y])[2:-2].title()
+                descrip1 = ', '.join([dict['description'] for dict in y]).title()
                 icon_url1 = f"http://openweathermap.org/img/wn/{icon1}@2x.png"
 
                 # Current City Coordinates
@@ -184,7 +182,6 @@ class cityweather(LogFormatter):
 
                 # Current City
                 citi1 = cur_api['name']
-                print(f"trying {citi1}")
 
                 # Current City Country
                 v = cur_api['sys']
@@ -199,52 +196,44 @@ class cityweather(LogFormatter):
                 # Current Timezone
                 cur_timeoffset = cur_api['timezone']
                 cur_timeoffset = datetime.timedelta(seconds=cur_timeoffset)
-                now = datetime.datetime.now(pytz.utc)
+                cur_now = datetime.datetime.now(pytz.utc)
                 cur_countryname = country_alpha2_to_country_name(country1)
-                cur_offset_matches = [tz.zone for tz in map(timezone, pytz.all_timezones_set) if now.astimezone(tz).utcoffset() == cur_timeoffset]
-                print(cur_offset_matches)
+                if cur_countryname == "United States":
+                    cur_countryname = 'America'
+                cur_offset_matches = [tz.zone for tz in map(pytz.timezone, pytz.all_timezones_set) if cur_now.astimezone(tz).utcoffset() == cur_timeoffset]
                 if len(cur_offset_matches) > 1:
-                    for listitem in cur_offset_matches:
-                        if citi1 in listitem:
-                            print('trying citi1')
-                            firstchoice = [listitem for listitem in cur_offset_matches][0:1]
-                            print(firstchoice)
-                        elif cur_countryname in listitem:
-                            print('trying country1')
-                            secondchoice = [listitem for listitem in cur_offset_matches][0:1]
-                            firstchoice = [listitem for listitem in secondchoice if citi1 in listitem][0:1]
-                            print(secondchoice)
-                            print(firstchoice)
-                        else:
-                            print('trying else1')
-                            print(cur_offset_matches)
-                            firstchoice = cur_offset_matches[0:1]
-                            print(firstchoice)
-                        print(firstchoice)
-                        cur_zone = str(firstchoice)[2:-2]
+                    cur_firstchoice = []
+                    try:
+                        print(f'searching for {citi1}')
+                        cur_firstchoice += [listitem for listitem in cur_offset_matches if citi1 in listitem]
+                    except:
+                        pass
+                    try:
+                        print(f'searching for {cur_countryname}')
+                        cur_firstchoice += [listitem for listitem in cur_offset_matches if cur_countryname in listitem]
+                    except:
+                        pass
+                    try:
+                        print(f'searching for {country1}')
+                        cur_firstchoice += [listitem for listitem in cur_offset_matches if country1 in listitem]
+                    except:
+                        pass
+                    if len(cur_firstchoice) == 0:
+                        cur_firstchoice = cur_offset_matches
+                    print(f'available timezones: {cur_firstchoice}')
+                    cur_zone = ''.join(cur_firstchoice[0])
+                    print(f'picked timezone: {cur_zone}')
                 else:
-                    cur_zone = str(cur_offset_matches)[2:-2]
-                print(cur_zone)
-                cur_zone = timezone(cur_zone)
-                print(cur_zone)
+                    cur_zone = ''.join(cur_offset_matches)
+                cur_zone = pytz.timezone(cur_zone)
 
                 # Current Date
                 cur_dt = cur_api['dt']
-                print(cur_dt)
 
                 # Localize time to UTC and then convert to the appropriate time zone
-
                 cur_dt = datetime.datetime.fromtimestamp(cur_dt)
-                cur_utc_dt = utc.localize(cur_dt)
+                cur_utc_dt = cur_dt.astimezone(utc)
                 cur_dt = cur_utc_dt.astimezone(cur_zone)
-                print('now datecall')
-                # cur_dt = datetime.datetime.fromtimestamp(cur_dt)
-                # utc_datetime = datetime.datetime(cur_dt, tzinfo=datetime.timezone.utc)
-                # local_datetime = utc_datetime.replace(tzinfo=pytz.utc)
-                # cur_dt = local_datetime.astimezone(cur_zone)
-                #print(local_datetime)
-
-                #cur_dt = (cur_dt + datetime.timedelta(seconds=cur_timezone)).dst()
                 cur_date = cur_dt.strftime('%d %B, %Y')
                 cur_time = cur_dt.strftime('%H:%M (%p)')
 
@@ -258,7 +247,7 @@ class cityweather(LogFormatter):
                 # Satellite City Icon
                 b = sat_api['weather']
                 icon2 = [dict['icon'] for dict in b]
-                descrip2 = str([dict['description'] for dict in b])[2:-2].title()
+                descrip2 = ', '.join([dict['description'] for dict in b]).title()
                 icon_url2 = f"http://openweathermap.org/img/wn/{icon2}@2x.png"
 
                 # Satellite City Coordinates
@@ -278,56 +267,53 @@ class cityweather(LogFormatter):
 
                 # Satellite City
                 citi2 = sat_api['name']
-                print(f"trying {citi2}")
 
                 # Satellite Timezone
                 sat_timeoffset = sat_api['timezone']
                 sat_timeoffset = datetime.timedelta(seconds=sat_timeoffset)
-                now = datetime.datetime.now(pytz.utc)
+                sat_now = datetime.datetime.now(pytz.utc)
                 sat_countryname = country_alpha2_to_country_name(country2)
-                sat_offset_matches = [tz.zone for tz in map(timezone, pytz.all_timezones_set) if now.astimezone(tz).utcoffset() == sat_timeoffset]
-                print(sat_offset_matches)
+                if sat_countryname == 'United States':
+                    sat_countryname = 'America'
+                sat_offset_matches = [tz.zone for tz in map(pytz.timezone, pytz.all_timezones_set) if sat_now.astimezone(tz).utcoffset() == sat_timeoffset]
                 if len(sat_offset_matches) > 1:
-                    for listitem in sat_offset_matches:
-                        if citi2 in listitem:
-                            print('trying citi2')
-                            firstchoice = [listitem for listitem in sat_offset_matches][0:1]
-                            print(firstchoice)
-                        elif sat_countryname in listitem:
-                            print('trying country2')
-                            secondchoice = [listitem for listitem in sat_offset_matches][0:1]
-                            firstchoice = [listitem for listitem in secondchoice if citi2 in listitem][0:1]
-                            print(secondchoice)
-                            print(firstchoice)
-                        else:
-                            print('trying else2')
-                            print(sat_offset_matches)
-                            firstchoice = sat_offset_matches[0:1]
-                            print(firstchoice)
-                        print(firstchoice)
-                        sat_zone = str(firstchoice)[2:-2]
+                    sat_firstchoice = []
+                    try:
+                        print(f'searching for {citi2}')
+                        sat_firstchoice += [listitem for listitem in sat_offset_matches if citi2 in listitem]
+                    except:
+                        pass
+                    try:
+                        print(f'searching for {sat_countryname}')
+                        sat_firstchoice += [listitem for listitem in sat_offset_matches if sat_countryname in listitem]
+                    except:
+                        pass
+                    try:
+                        print(f'searching for {country2}')
+                        sat_firstchoice += [listitem for listitem in sat_offset_matches if country2 in listitem]
+                    except:
+                        pass
+                    if len(sat_firstchoice) == 0:
+                        sat_firstchoice = sat_offset_matches
+                    print(f'available timezones: {sat_firstchoice}')
+                    sat_zone = ''.join(sat_firstchoice[0])
+                    print(f'picked timezone: {sat_zone}')
                 else:
-                    sat_zone = str(sat_offset_matches)[2:-2]
-                print(sat_zone)
-                sat_zone = timezone(sat_zone)
+                    sat_zone = ''.join(sat_offset_matches)
+                sat_zone = pytz.timezone(sat_zone)
 
                 # Satellite Date
                 sat_dt = sat_api['dt']
                 sat_dt = datetime.datetime.fromtimestamp(sat_dt)
-                sat_utc_dt = utc.localize(sat_dt)
+                sat_utc_dt = sat_dt.astimezone(utc)
                 sat_dt = sat_utc_dt.astimezone(sat_zone)
                 sat_dt = sat_dt.astimezone(sat_zone)
-                # sat_dt = sat_zone.localize(datetime(sat_dt), is_dst=True)
-                # #sat_dt = (sat_dt + datetime.timedelta(seconds=sat_timezone)).dst()
-                # print(cur_dt)
-                print('now datecall')
                 sat_date = sat_dt.strftime('%d %B, %Y')
                 sat_time = sat_dt.strftime('%H:%M (%p)')
 
                 # Theme for current sun/rain status:
                 icon1_img = icon_url1
                 icon2_img = icon_url2
-
 
                 # def get_source(src=icon_url1):
                 #     r = requests.get(src)
