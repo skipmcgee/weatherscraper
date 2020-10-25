@@ -164,6 +164,7 @@ class cityweather(LogFormatter):
                 utc = pytz.timezone('UTC')
                 # API Call
                 api_key = "x"
+                ######################## Needs separate gets and input cleaning to prevent issues
                 cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                                     + city1_entry.get() + "&units=imperial&appid=" + api_key)
                 cur_api = json.loads(cur_api_request.content)
@@ -324,6 +325,7 @@ class cityweather(LogFormatter):
                 icon1_img = icon_url1
                 icon2_img = icon_url2
 
+                # Display a day / night icon to indicate the current status at the location, display the current weather icon
                 # def get_source(src=icon_url1):
                 #     r = requests.get(src)
                 #     if r.status_code == 200:
@@ -522,7 +524,7 @@ class cityweather(LogFormatter):
             error = error
             self.error_message(error, level=4)
 
-
+        ########################  Need to add exceptionhandling for incorrect names, api can't locate city, other expected exceptions
         except Exception as error:
             self.error_message(error, level=4)
             self.log_message_end()
