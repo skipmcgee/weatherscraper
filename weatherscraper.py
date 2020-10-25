@@ -38,6 +38,7 @@ import datetime
 from PIL import ImageTk, Image
 import pytz
 from pycountry_convert import country_alpha2_to_country_name
+from countryinfo import CountryInfo
 
 # <script src="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/external_box_hour_by_hour.js"></script><noscript><a href="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/">yr.no: Forecast for Lago di Patria</a></noscript>
 
@@ -140,20 +141,20 @@ class cityweather(LogFormatter):
             panel.place(x=(self.w/2)-50, y=(self.l/2)-30)
 
             # Labels for Entry Fields
-            textlabel1 = Label(weatherapp, font=("Helvetica", 15), justify="left", bg="light gray", text="Current Location:")
-            textlabel2 = Label(weatherapp, font=("Helvetica", 15), justify="left", bg="light gray",text="Distant Location:")
+            textlabel1 = Label(weatherapp, font=("Helvetica", 12), justify="left", bg="light gray", text="Current Location:")
+            textlabel2 = Label(weatherapp, font=("Helvetica", 12), justify="left", bg="light gray",text="Distant Location:")
             textlabel1.grid(row=0, column=0, sticky=W+E+N+S)
             textlabel2.grid(row=1, column=0, sticky=W+E+N+S)
 
             # Current City Search
             city1_name = StringVar()
-            city1_entry = Entry(weatherapp, font=("Helvetica", 15), justify="left", bg="white", fg='gray', textvariable=city1_name, width=30)
+            city1_entry = Entry(weatherapp, font=("Helvetica", 12), justify="left", bg="white", fg='gray', textvariable=city1_name, width=29)
             city1_entry.grid(row=0, column=1, ipadx=0, ipady=4, sticky=N+W)
 
 
             # Sat City Search
             city2_name = StringVar()
-            city2_entry = Entry(weatherapp, font=("Helvetica", 15), justify="left", bg="white", fg='gray', textvariable=city2_name, width=30)
+            city2_entry = Entry(weatherapp, font=("Helvetica", 12), justify="left", bg="white", fg='gray', textvariable=city2_name, width=29)
             city2_entry.grid(row=1, column=1, ipadx=0, ipady=4, sticky=W+N)
 
             if self.init_counter == True:
@@ -208,26 +209,42 @@ class cityweather(LogFormatter):
                 cur_timeoffset = datetime.timedelta(seconds=cur_timeoffset)
                 cur_now = datetime.datetime.now(pytz.utc)
                 cur_countryname = country_alpha2_to_country_name(country1)
-                if cur_countryname == "United States":
+                cur_capital = CountryInfo(cur_countryname)
+                cur_capital = cur_capital.capital()
+                if cur_countryname == 'United States':
                     cur_countryname = 'America'
                 cur_offset_matches = [tz.zone for tz in map(pytz.timezone, pytz.all_timezones_set) if cur_now.astimezone(tz).utcoffset() == cur_timeoffset]
                 if len(cur_offset_matches) > 1:
                     cur_firstchoice = []
                     try:
-                        print(f'searching for {citi1}')
+                        print(f'searching for {citi2}')
                         cur_firstchoice += [listitem for listitem in cur_offset_matches if citi1 in listitem]
                     except:
                         pass
                     try:
-                        print(f'searching for {country1}')
+                        print(f'searching for {country2}')
                         cur_firstchoice += [listitem for listitem in cur_offset_matches if country1 in listitem]
                     except:
                         pass
+                    if len(cur_firstchoice) == 0:
+                        try:
+                            print(f'searching for {cur_capital}')
+                            cur_firstchoice += [listitem for listitem in cur_offset_matches if cur_capital in listitem]
+                        except:
+                            pass
                     try:
                         print(f'searching for {cur_countryname}')
                         cur_firstchoice += [listitem for listitem in cur_offset_matches if cur_countryname in listitem]
                     except:
                         pass
+                    if len(cur_firstchoice) >= 2:
+                        try:
+                            print(f'searching for {cur_capital}')
+                            secondchoice = ''.join([listitem for listitem in cur_offset_matches if cur_capital in listitem])
+                            if secondchoice != '':
+                                cur_firstchoice.insert(0, secondchoice)
+                        except:
+                            pass
                     if len(cur_firstchoice) == 0:
                         cur_firstchoice = cur_offset_matches
                     print(f'available timezones: {cur_firstchoice}')
@@ -283,6 +300,8 @@ class cityweather(LogFormatter):
                 sat_timeoffset = datetime.timedelta(seconds=sat_timeoffset)
                 sat_now = datetime.datetime.now(pytz.utc)
                 sat_countryname = country_alpha2_to_country_name(country2)
+                sat_capital = CountryInfo(sat_countryname)
+                sat_capital = sat_capital.capital()
                 if sat_countryname == 'United States':
                     sat_countryname = 'America'
                 sat_offset_matches = [tz.zone for tz in map(pytz.timezone, pytz.all_timezones_set) if sat_now.astimezone(tz).utcoffset() == sat_timeoffset]
@@ -298,11 +317,25 @@ class cityweather(LogFormatter):
                         sat_firstchoice += [listitem for listitem in sat_offset_matches if country2 in listitem]
                     except:
                         pass
+                    if len(sat_firstchoice) == 0:
+                        try:
+                            print(f'searching for {sat_capital}')
+                            sat_firstchoice += [listitem for listitem in sat_offset_matches if sat_capital in listitem]
+                        except:
+                            pass
                     try:
                         print(f'searching for {sat_countryname}')
                         sat_firstchoice += [listitem for listitem in sat_offset_matches if sat_countryname in listitem]
                     except:
                         pass
+                    if len(sat_firstchoice) >= 2:
+                        try:
+                            print(f'searching for {sat_capital}')
+                            secondchoice = ''.join([listitem for listitem in sat_offset_matches if sat_capital in listitem])
+                            if secondchoice != '':
+                                sat_firstchoice.insert(0, secondchoice)
+                        except:
+                            pass
                     if len(sat_firstchoice) == 0:
                         sat_firstchoice = sat_offset_matches
                     print(f'available timezones: {sat_firstchoice}')
@@ -375,7 +408,7 @@ class cityweather(LogFormatter):
                 label_lat1.configure(text=f"Latitude: {latitude1}"+ '\u00b0')
                 label_citi1.configure(text=f"Current: {citi1}, {country1}")
                 label_descrip1.configure(text=f"Weather: {descrip1}")
-                label_time1.configure(text=f"Time: {cur_time} L")
+                label_time1.configure(text=f"Local Time: {cur_time}")
                 label_date1.configure(text=f"{cur_date}")
                 #label_icon1.configure(img={icon1_img})
 
@@ -387,7 +420,7 @@ class cityweather(LogFormatter):
                 label_lat2.configure(text=f"Latitude: {latitude2}"+ '\u00b0')
                 label_citi2.configure(text=f"Distant: {citi2}, {country2}")
                 label_descrip2.configure(text=f"Weather: {descrip2}")
-                label_time2.configure(text=f"Time: {sat_time} L")
+                label_time2.configure(text=f"Local Time: {sat_time}")
                 label_date2.configure(text=f"{sat_date}")
                 #label_icon2.configure(img={icon2_img})
 
@@ -419,67 +452,67 @@ class cityweather(LogFormatter):
 
 
             # Icon Placement
-            label_icon1 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
+            label_icon1 = Label(weatherapp, width=0, bg='white', font=("bold", 14))
             label_icon1.place(x=3, y=170)
-            label_icon2 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
+            label_icon2 = Label(weatherapp, width=0, bg='white', font=("bold", 14))
             label_icon2.place(x=((self.w/2)+3), y=170)
 
             # Country Names and Coordinates
-            label_citi1 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
+            label_citi1 = Label(weatherapp, width=0, bg='white', font=("bold", 14))
             label_citi1.place(x=3, y=80)
-            label_citi2 = Label(weatherapp, width=0, bg='white', font=("bold", 15))
+            label_citi2 = Label(weatherapp, width=0, bg='white', font=("bold", 14))
             label_citi2.place(x=((self.w/2)+3), y=80)
 
-            label_lat1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_lat1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_lat1.place(x=3, y=110)
-            label_lat2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_lat2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_lat2.place(x=((self.w/2)+3), y=110)
 
-            label_lon1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_lon1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_lon1.place(x=3, y=140)
-            label_lon2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_lon2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_lon2.place(x=((self.w/2)+3), y=140)
 
             # Dates
-            label_date1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_date1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_date1.place(x=3, y=200)
-            label_date2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_date2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_date2.place(x=((self.w/2)+3), y=200)
 
             # Time
-            label_time1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_time1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_time1.place(x=3, y=170)
-            label_time2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_time2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_time2.place(x=((self.w/2)+3), y=170)
 
             # Weather Description
-            label_descrip1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 15))
+            label_descrip1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 14))
             label_descrip1.place(x=3, y=400)
-            label_descrip2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 15))
+            label_descrip2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 14))
             label_descrip2.place(x=((self.w/2)+3), y=400)
 
             # Current Temperature
-            label_temp1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 15))
+            label_temp1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 14))
             label_temp1.place(x=3, y=430)
-            label_temp2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 15))
+            label_temp2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 14))
             label_temp2.place(x=((self.w/2)+3), y=430)
 
             # Humidity
-            label_humidity1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_humidity1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_humidity1.place(x=3, y=460)
-            label_humidity2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            label_humidity2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_humidity2.place(x=((self.w/2)+3), y=460)
 
             # Max Temperature
-            max_temp1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            max_temp1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             max_temp1.place(x=3, y=490)
-            max_temp2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            max_temp2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             max_temp2.place(x=((self.w/2)+3), y=490)
 
             # Min Temperature
-            min_temp1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            min_temp1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             min_temp1.place(x=3, y=520)
-            min_temp2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 15))
+            min_temp2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             min_temp2.place(x=((self.w/2)+3), y=520)
 
             # Note
@@ -487,9 +520,9 @@ class cityweather(LogFormatter):
             note.place(x=120, y=550)
 
             # Search Button
-            city_nameButton1 = Button(weatherapp, font=("Helvetica", 15), text="Search", command=city_info)
+            city_nameButton1 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=city_info)
             city_nameButton1.grid(row=0, column=2, padx=0, pady=0, sticky=W+E+N+S)
-            city_nameButton2 = Button(weatherapp, font=("Helvetica", 15), text="Search", command=city_info)
+            city_nameButton2 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=city_info)
             city_nameButton2.grid(row=1, column=2, padx=0, pady=0, sticky=W+E+N+S)
 
             # Theme for the respective time the application is used
