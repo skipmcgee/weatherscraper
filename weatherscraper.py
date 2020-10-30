@@ -174,17 +174,17 @@ class cityweather(LogFormatter):
         #     t.daemon = True
         #     t.start()
         #     tk.mainloop()
-        #
-        #
-        #
-        #
-        #     weatherapp = Tk()
-        #     weatherapp.title("DJC2 20.2 'The Looters' Weather App")
-        #     weatherapp.geometry(f"{self.w}x{self.l}")
-        #     weatherapp['background'] = "white"
-        #     print('top of the app')
-        #     weatherapp.button = False
-        #     weatherapp.init_counter = True
+
+
+
+
+            weatherapp = Tk()
+            weatherapp.title("DJC2 20.2 'The Looters' Weather App")
+            weatherapp.geometry(f"{self.w}x{self.l}")
+            weatherapp['background'] = "white"
+            print('top of the app')
+            weatherapp.button = False
+            weatherapp.init_counter = True
 
             # TF 51/1 Logo Image
             logo = ImageTk.PhotoImage(Image.open('logo.png'))
