@@ -122,6 +122,7 @@ class cityweather(LogFormatter):
         self.l = 580
         self.current_city = current_city
         self.sat_city = sat_city
+        self.api_key = "x"
 
     def big_timer(self):
         # 15 min timer for updating weather info
@@ -161,17 +162,13 @@ class cityweather(LogFormatter):
                 city1_entry.insert(0, self.current_city)
                 city2_entry.insert(0, self.sat_city)
 
-            def city_info():
+            def cur_city_info(self):
                 utc = pytz.timezone('UTC')
                 # API Call
-                api_key = "x"
                 ######################## Needs separate gets and input cleaning to prevent issues
                 cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
-                                                    + city1_entry.get() + "&units=imperial&appid=" + api_key)
+                                                    + city1_entry.get() + "&units=imperial&appid=" + self.api_key)
                 cur_api = json.loads(cur_api_request.content)
-                sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
-                                                + city2_entry.get() + "&units=imperial&appid=" + api_key)
-                sat_api = json.loads(sat_api_request.content)
 
                 # Current City Temperatures
                 z = cur_api['main']
@@ -200,11 +197,16 @@ class cityweather(LogFormatter):
                 cur_sunrise = v['sunrise']
                 cur_sunrise = datetime.datetime.fromtimestamp(cur_sunrise)
                 cur_sunrise = utc.localize(cur_sunrise)
+                self.cur_sunrise = cur_sunrise
                 cur_sunset = v['sunset']
                 cur_sunset = datetime.datetime.fromtimestamp(cur_sunset)
                 cur_sunset = utc.localize(cur_sunset)
+                self.cur_sunset = cur_sunset
 
                 # Current Timezone via offset and dict search
+                # Note that getting the timezone perfectly right doesn't really matter as long as the offset is correct.
+                # However, we will get as generally close as possible here without correcting for spaces,
+                # colloquial countrynames, using state capitals or population centers to identify timezones, etc.
                 cur_timeoffset = cur_api['timezone']
                 cur_timeoffset = datetime.timedelta(seconds=cur_timeoffset)
                 cur_now = datetime.datetime.now(pytz.utc)
@@ -215,7 +217,7 @@ class cityweather(LogFormatter):
                     cur_countryname = 'America'
                 cur_offset_matches = [tz.zone for tz in map(pytz.timezone, pytz.all_timezones_set) if cur_now.astimezone(tz).utcoffset() == cur_timeoffset]
                 if len(cur_offset_matches) > 1:
-                    cur_firstchoice = []
+                    cur_firstchoice, cur_secondchoice = [], []
                     try:
                         print(f'searching for {citi2}')
                         cur_firstchoice += [listitem for listitem in cur_offset_matches if citi1 in listitem]
@@ -239,10 +241,17 @@ class cityweather(LogFormatter):
                         pass
                     if len(cur_firstchoice) >= 2:
                         try:
-                            print(f'searching for {cur_capital}')
-                            secondchoice = ''.join([listitem for listitem in cur_offset_matches if cur_capital in listitem])
-                            if secondchoice != '':
-                                cur_firstchoice.insert(0, secondchoice)
+                            print(f'searching for {citi1}')
+                            cur_secondchoice += [listitem for listitem in cur_firstchoice if citi1 in listitem]
+                            if cur_secondchoice != '':
+                                cur_firstchoice.insert(0, cur_secondchoice[0])
+                            else:
+                                print(f"city {city1} not found")
+                            cur_secondchoice += [listitem for listitem in cur_firstchoice if cur_capital in listitem]
+                            if cur_secondchoice != '':
+                                cur_firstchoice.insert(0, cur_secondchoice[0])
+                            else:
+                                print(f"capital {cur_capital} not found")
                         except:
                             pass
                     if len(cur_firstchoice) == 0:
@@ -260,103 +269,14 @@ class cityweather(LogFormatter):
                 # Current Date & Time converted from UNIX timestamp to UTC and then to Local
                 cur_dt = datetime.datetime.fromtimestamp(cur_dt)
                 cur_utc_dt = cur_dt.astimezone(utc)
+                self.cur_utc_dt = cur_utc_dt
                 cur_dt = cur_utc_dt.astimezone(cur_zone)
                 cur_date = cur_dt.strftime('%d %B, %Y')
                 cur_time = cur_dt.strftime('%H:%M (%p)')
 
-                # Satellite City Temperatures
-                a = sat_api['main']
-                current_temperature2 = a['temp']
-                humidity2 = a['humidity']
-                tempmin2 = a['temp_min']
-                tempmax2 = a['temp_max']
-
-                # Satellite City Icon
-                b = sat_api['weather']
-                icon2 = [dict['icon'] for dict in b]
-                descrip2 = ', '.join([dict['description'] for dict in b]).title()
-                icon_url2 = f"http://openweathermap.org/img/wn/{icon2}@2x.png"
-
-                # Satellite City Coordinates
-                c = sat_api['coord']
-                longitude2 = c['lon']
-                latitude2 = c['lat']
-
-                # Satellite City Country & daylight information
-                d = sat_api['sys']
-                country2 = d['country']
-                sat_sunrise = d['sunrise']
-                sat_sunrise = datetime.datetime.fromtimestamp(sat_sunrise)
-                sat_sunrise = utc.localize(sat_sunrise)
-                sat_sunset = d['sunset']
-                sat_sunset = datetime.datetime.fromtimestamp(sat_sunset)
-                sat_sunset = utc.localize(sat_sunset)
-
-                # Satellite City
-                citi2 = sat_api['name']
-
-                # Satellite Timezone via offset and dict search
-                sat_timeoffset = sat_api['timezone']
-                sat_timeoffset = datetime.timedelta(seconds=sat_timeoffset)
-                sat_now = datetime.datetime.now(pytz.utc)
-                sat_countryname = country_alpha2_to_country_name(country2)
-                sat_capital = CountryInfo(sat_countryname)
-                sat_capital = sat_capital.capital()
-                if sat_countryname == 'United States':
-                    sat_countryname = 'America'
-                sat_offset_matches = [tz.zone for tz in map(pytz.timezone, pytz.all_timezones_set) if sat_now.astimezone(tz).utcoffset() == sat_timeoffset]
-                if len(sat_offset_matches) > 1:
-                    sat_firstchoice = []
-                    try:
-                        print(f'searching for {citi2}')
-                        sat_firstchoice += [listitem for listitem in sat_offset_matches if citi2 in listitem]
-                    except:
-                        pass
-                    try:
-                        print(f'searching for {country2}')
-                        sat_firstchoice += [listitem for listitem in sat_offset_matches if country2 in listitem]
-                    except:
-                        pass
-                    if len(sat_firstchoice) == 0:
-                        try:
-                            print(f'searching for {sat_capital}')
-                            sat_firstchoice += [listitem for listitem in sat_offset_matches if sat_capital in listitem]
-                        except:
-                            pass
-                    try:
-                        print(f'searching for {sat_countryname}')
-                        sat_firstchoice += [listitem for listitem in sat_offset_matches if sat_countryname in listitem]
-                    except:
-                        pass
-                    if len(sat_firstchoice) >= 2:
-                        try:
-                            print(f'searching for {sat_capital}')
-                            secondchoice = ''.join([listitem for listitem in sat_offset_matches if sat_capital in listitem])
-                            if secondchoice != '':
-                                sat_firstchoice.insert(0, secondchoice)
-                        except:
-                            pass
-                    if len(sat_firstchoice) == 0:
-                        sat_firstchoice = sat_offset_matches
-                    print(f'available timezones: {sat_firstchoice}')
-                    sat_zone = ''.join(sat_firstchoice[0])
-                    print(f'picked timezone: {sat_zone}')
-                else:
-                    sat_zone = ''.join(sat_offset_matches)
-                sat_zone = pytz.timezone(sat_zone)
-
-                # Satellite Date & Time converted from UNIX timestamp to UTC and then to Local
-                sat_dt = sat_api['dt']
-                sat_dt = datetime.datetime.fromtimestamp(sat_dt)
-                sat_utc_dt = sat_dt.astimezone(utc)
-                sat_dt = sat_utc_dt.astimezone(sat_zone)
-                sat_dt = sat_dt.astimezone(sat_zone)
-                sat_date = sat_dt.strftime('%d %B, %Y')
-                sat_time = sat_dt.strftime('%H:%M (%p)')
 
                 # Theme for current sun/rain status:
                 icon1_img = icon_url1
-                icon2_img = icon_url2
 
                 # Display a day / night icon to indicate the current status at the location, display the current weather icon
                 # def get_source(src=icon_url1):
@@ -406,49 +326,180 @@ class cityweather(LogFormatter):
                 min_temp1.configure(text=f"Min Temp Today: {tempmin1}\u00b0")
                 label_lon1.configure(text=f"Longitude: {longitude1}" + '\u00b0')
                 label_lat1.configure(text=f"Latitude: {latitude1}"+ '\u00b0')
-                label_citi1.configure(text=f"Current: {citi1}, {country1}")
+                label_citi1.configure(text=f"{citi1}, {country1}")
                 label_descrip1.configure(text=f"Weather: {descrip1}")
                 label_time1.configure(text=f"Local Time: {cur_time}")
                 label_date1.configure(text=f"{cur_date}")
                 #label_icon1.configure(img={icon1_img})
 
+
+
+
+            def sat_city_info(self):
+                utc = pytz.timezone('UTC')
+                # API Call
+                ######################## Needs separate gets and input cleaning to prevent issues
+                sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
+                                                + city2_entry.get() + "&units=imperial&appid=" + self.api_key)
+                sat_api = json.loads(sat_api_request.content)
+
+                # Satellite City Temperatures
+                a = sat_api['main']
+                current_temperature2 = a['temp']
+                humidity2 = a['humidity']
+                tempmin2 = a['temp_min']
+                tempmax2 = a['temp_max']
+
+                # Satellite City Icon
+                b = sat_api['weather']
+                icon2 = [dict['icon'] for dict in b]
+                descrip2 = ', '.join([dict['description'] for dict in b]).title()
+                icon_url2 = f"http://openweathermap.org/img/wn/{icon2}@2x.png"
+
+                # Satellite City Coordinates
+                c = sat_api['coord']
+                longitude2 = c['lon']
+                latitude2 = c['lat']
+
+                # Satellite City Country & daylight information
+                d = sat_api['sys']
+                country2 = d['country']
+                sat_sunrise = d['sunrise']
+                sat_sunrise = datetime.datetime.fromtimestamp(sat_sunrise)
+                sat_sunrise = utc.localize(sat_sunrise)
+                self.sat_sunrise = sat_sunrise
+                sat_sunset = d['sunset']
+                sat_sunset = datetime.datetime.fromtimestamp(sat_sunset)
+                sat_sunset = utc.localize(sat_sunset)
+                self.sat_sunset = sat_sunset
+
+                # Satellite City
+                citi2 = sat_api['name']
+
+                # Satellite Timezone via offset and dict search
+                sat_timeoffset = sat_api['timezone']
+                sat_timeoffset = datetime.timedelta(seconds=sat_timeoffset)
+                sat_now = datetime.datetime.now(pytz.utc)
+                sat_countryname = country_alpha2_to_country_name(country2)
+                sat_capital = CountryInfo(sat_countryname)
+                sat_capital = sat_capital.capital()
+                if sat_countryname == 'United States':
+                    sat_countryname = 'America'
+                sat_offset_matches = [tz.zone for tz in map(pytz.timezone, pytz.all_timezones_set) if sat_now.astimezone(tz).utcoffset() == sat_timeoffset]
+                if len(sat_offset_matches) > 1:
+                    sat_firstchoice, sat_secondchoice = [], []
+                    try:
+                        print(f'searching for {citi2}')
+                        sat_firstchoice += [listitem for listitem in sat_offset_matches if citi2 in listitem]
+                    except:
+                        pass
+                    try:
+                        print(f'searching for {country2}')
+                        sat_firstchoice += [listitem for listitem in sat_offset_matches if country2 in listitem]
+                    except:
+                        pass
+                    if len(sat_firstchoice) == 0:
+                        try:
+                            print(f'searching for {sat_capital}')
+                            sat_firstchoice += [listitem for listitem in sat_offset_matches if sat_capital in listitem]
+                        except:
+                            pass
+                    try:
+                        print(f'searching for {sat_countryname}')
+                        sat_firstchoice += [listitem for listitem in sat_offset_matches if sat_countryname in listitem]
+                    except:
+                        pass
+                    if len(sat_firstchoice) >= 2:
+                        try:
+                            print(f'searching for {citi2}')
+                            sat_secondchoice += [listitem for listitem in sat_firstchoice if citi2 in listitem]
+                            if sat_secondchoice != '':
+                                sat_firstchoice.insert(0, sat_secondchoice[0])
+                            else:
+                                print(f"city {city2} not found")
+                            sat_secondchoice += [listitem for listitem in sat_firstchoice if sat_capital in listitem]
+                            if sat_secondchoice != '':
+                                sat_firstchoice.insert(0, sat_secondchoice[0])
+                            else:
+                                print(f"capital {sat_capital} not found")
+                        except:
+                            pass
+                    if len(sat_firstchoice) == 0:
+                        sat_firstchoice = sat_offset_matches
+                    print(f'available timezones: {sat_firstchoice}')
+                    sat_zone = ''.join(sat_firstchoice[0])
+                    print(f'picked timezone: {sat_zone}')
+                else:
+                    sat_zone = ''.join(sat_offset_matches)
+                sat_zone = pytz.timezone(sat_zone)
+
+                # Satellite Date & Time converted from UNIX timestamp to UTC and then to Local
+                sat_dt = sat_api['dt']
+                sat_dt = datetime.datetime.fromtimestamp(sat_dt)
+                sat_utc_dt = sat_dt.astimezone(utc)
+                self.sat_utc_dt = sat_utc_dt
+                sat_dt = sat_utc_dt.astimezone(sat_zone)
+                sat_dt = sat_dt.astimezone(sat_zone)
+                sat_date = sat_dt.strftime('%d %B, %Y')
+                sat_time = sat_dt.strftime('%H:%M (%p)')
+
+                # Theme for current sun/rain status:
+                icon2_img = icon_url2
+
+                # Display a day / night icon to indicate the current status at the location, display the current weather icon
+                # def get_source(src=icon_url1):
+                #     r = requests.get(src)
+                #     if r.status_code == 200:
+                #         return soup(r.text)
+                #     else:
+                #         sys.exit( "[~] Invalid Response Received." )
+                #
+                # def filter(html):
+                #     imgs = html.findAll( "img" )
+                #     if imgs:
+                #         return imgs
+                #     else:
+                #         sys.exit("[~] No images detected on the page.")
+                #
+                # def requesthandle(src=icon_url1):
+                #     try:
+                #         r = requests.get(src, stream=True)
+                #         if r.status_code == 200:
+                #             r.raw.decode_content = True
+                #             with open(name, "wb") as f:
+                #                 shutil.copyfileobj(r.raw, f)
+                #             print(f"[*] Downloaded Image: {name}")
+                #     except Exception as error:
+                #         print(f"[~] Error Occured with {name} : {error}")
+                #
+                # def get_img():
+                #     html = get_source()
+                #     tag = filter(html)
+                #     src = tag.get("img")
+                #     if src:
+                #         src = src.groups()
+                #         img = ImageTk.PhotoImage(Image.open(src))
+                #         panel = Label(weatherapp, image=img)
+                #         panel.place(x=1, y=200)
+                #     else:
+                #         img = ImageTk.PhotoImage(Image.open('img_notfound.png'))
+                #         panel = Label(weatherapp, image=img)
+                #         panel.place(x=1, y=200)
+
+
+                # Update the information labels
                 label_temp2.configure(text=f"Temperature: {current_temperature2}" + '\u00b0')
                 label_humidity2.configure(text=f"Humidity: {humidity2}%")
                 max_temp2.configure(text="Max Temp Today: " + f"{tempmax2}" + '\u00b0')
                 min_temp2.configure(text=f"Min Temp Today: {tempmin2}\u00b0")
                 label_lon2.configure(text=f"Longitude: {longitude2}"+ '\u00b0')
                 label_lat2.configure(text=f"Latitude: {latitude2}"+ '\u00b0')
-                label_citi2.configure(text=f"Distant: {citi2}, {country2}")
+                label_citi2.configure(text=f"{citi2}, {country2}")
                 label_descrip2.configure(text=f"Weather: {descrip2}")
                 label_time2.configure(text=f"Local Time: {sat_time}")
                 label_date2.configure(text=f"{sat_date}")
                 #label_icon2.configure(img={icon2_img})
 
-                # Image application
-                night = ImageTk.PhotoImage(Image.open('night.png'))
-                day = ImageTk.PhotoImage(Image.open('day.png'))
-                if cur_utc_dt >= cur_sunrise:
-                    if cur_utc_dt <= cur_sunset:
-                        print("day")
-                        day_night1 = day
-                    else:
-                        print('night1')
-                        day_night1 = night
-                else:
-                    print('night2')
-                    day_night1 = night
-                if sat_utc_dt >= sat_sunrise:
-                    if sat_utc_dt <= sat_sunset:
-                        print('day')
-                        day_night2 = day
-                    else:
-                        print('night1')
-                        day_night2 = night
-                else:
-                    print('night2')
-                    day_night2 = night
-                cur_day_night_panel.image = day_night1
-                sat_day_night_panel.image = day_night2
 
 
             # Icon Placement
@@ -520,9 +571,9 @@ class cityweather(LogFormatter):
             note.place(x=120, y=550)
 
             # Search Button
-            city_nameButton1 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=city_info)
+            city_nameButton1 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=cur_city_info(self))
             city_nameButton1.grid(row=0, column=2, padx=0, pady=0, sticky=W+E+N+S)
-            city_nameButton2 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=city_info)
+            city_nameButton2 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=sat_city_info(self))
             city_nameButton2.grid(row=1, column=2, padx=0, pady=0, sticky=W+E+N+S)
 
             # Theme for the respective time the application is used
@@ -531,17 +582,38 @@ class cityweather(LogFormatter):
             sat_day_night_panel = Label(weatherapp,  bg='white')
             sat_day_night_panel.place(x=((self.w / 2) + 3), y=240)
 
-
-            # Call for default values on application initialization
-            if self.init_counter == True:
-                city_info()
-
+                
+            # Image application
+            night = ImageTk.PhotoImage(Image.open('night.png'))
+            day = ImageTk.PhotoImage(Image.open('day.png'))
+            if self.cur_utc_dt >= self.cur_sunrise:
+                if self.cur_utc_dt <= self.cur_sunset:
+                    print("day")
+                    day_night1 = day
+                else:
+                    print('night1')
+                    day_night1 = night
+            else:
+                print('night2')
+                day_night1 = night
+            cur_day_night_panel.image = day_night1
+             # Image application
+            night = ImageTk.PhotoImage(Image.open('night.png'))
+            day = ImageTk.PhotoImage(Image.open('day.png'))
+            if self.sat_utc_dt >= self.sat_sunrise:
+                if self.sat_utc_dt <= self.sat_sunset:
+                    print('day')
+                    day_night2 = day
+                else:
+                    print('night1')
+                    day_night2 = night
+            else:
+                print('night2')
+                day_night2 = night
+            sat_day_night_panel.image = day_night2
 
             # Set the init-counter to False for future use
             self.init_counter = False
-
-
-
 
             # Need to add a looping thread to conduct a 15 min sleep and then call the api for updated information
             # if button1 == True or button2 ==True:
