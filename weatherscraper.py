@@ -40,6 +40,7 @@ import pytz
 from pycountry_convert import country_alpha2_to_country_name
 from countryinfo import CountryInfo
 import shutil
+import concurrent.futures
 
 # <script src="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/external_box_hour_by_hour.js"></script><noscript><a href="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/">yr.no: Forecast for Lago di Patria</a></noscript>
 
@@ -76,11 +77,11 @@ class LogFormatter(logging.Formatter):
         logging.info(begin_message)
 
     # Logs errors at the specified Severity Level
-    def error_message(self, error, level=4):
+    def message(self, error, level=4):
         error = error
         self.error_count += 1
         current_time = datetime.datetime.now()
-        error = {f"'error':{error}", f"'time':{current_time}", f"'severity':{level}"}
+        error = {f"'message':{error}", f"'time':{current_time}", f"'severity':{level}"}
         self.error_list.append(error)
         print(error)
         if level == (5 or 'CRITICAL' or 'critical'):
@@ -125,17 +126,21 @@ class cityweather(LogFormatter):
         self.sat_city = sat_city
         self.api_key = ""
 
+
     def big_timer(self):
         # 15 min timer for updating weather info
-        time.sleep(900)
+        self.message('starting big_timer()', level=2)
+        time.sleep(10)
+        self.message('ending big_timer()', level=2)
 
 
-    def app_setup(self, button1=False, button2=False):
+    def app_setup(self):
         try:
             weatherapp = Tk()
             weatherapp.title("DJC2 20.2 'The Looters' Weather App")
             weatherapp.geometry(f"{self.w}x{self.l}")
             weatherapp['background'] = "white"
+            print('top of the app')
 
             # TF 51/1 Logo Image
             logo = ImageTk.PhotoImage(Image.open('logo.png'))
@@ -332,6 +337,7 @@ class cityweather(LogFormatter):
                 # Theme for the respective time the application is used
                 weatherapp.cur_day_night_panel = Label(weatherapp, bg='white', image=weatherapp.day_night1)
                 weatherapp.cur_day_night_panel.place(x=5, y=225)
+
 
 
             def sat_city_info():
@@ -552,35 +558,50 @@ class cityweather(LogFormatter):
             note = Label(weatherapp, text="All temperatures in degrees Fahrenheit", bg='white', font=("italic", 10))
             note.place(x=120, y=550)
 
+
+            print('before buttons')
             # Search Button
             city_nameButton1 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=cur_city_info)
             city_nameButton1.grid(row=0, column=2, padx=0, pady=0, sticky=W+E+N+S)
             city_nameButton2 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=sat_city_info)
             city_nameButton2.grid(row=1, column=2, padx=0, pady=0, sticky=W+E+N+S)
-
+            print('after buttons')
             # Call default values
             if self.init_counter == True:
                 cur_city_info()
                 sat_city_info()
+                print('after call to info functions')
+            elif self.init_counter == False:
+                # Need to add a looping thread to conduct a 15 min sleep and then call the api for updated information
+                def take_a_break():
+                    print('entering the break')
+                    self.big_timer()
+                    cur_city_info()
+                    sat_city_info()
+                    take_a_break()
+                print('after take a break')
+                # with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                #     executor.map(take_a_break, range(1))
 
-            # Need to add a looping thread to conduct a 15 min sleep and then call the api for updated information
-            # if button1 == True or button2 ==True:
-            #     join()
-            #     complete weatherapp loop
-            #     start sleep thread again
-            # else:
-            #     call sleep thread again
+                self.naptime = Thread(target=take_a_break(), daemon=True)
+                self.message(error="starting take_a_break() in new daemon thread")
+                self.naptime.start()
+
+                # Need logic for if either of the search buttons are clicked
+                self.message(error="joining take_a_break() daemon thread")
+                self.naptime.join()
+
 
             self.init_counter = False
             weatherapp.mainloop()
 
         except ConnectionError as error:
             error = error
-            self.error_message(error, level=4)
+            self.message(error, level=4)
 
         ########################  Need to add exceptionhandling for incorrect names, api can't locate city, other expected exceptions
         except Exception as error:
-            self.error_message(error, level=4)
+            self.message(error, level=4)
             self.log_message_end()
             self.app_exit()
 
