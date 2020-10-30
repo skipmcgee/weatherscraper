@@ -39,6 +39,7 @@ from PIL import ImageTk, Image
 import pytz
 from pycountry_convert import country_alpha2_to_country_name
 from countryinfo import CountryInfo
+import shutil
 
 # <script src="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/external_box_hour_by_hour.js"></script><noscript><a href="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/">yr.no: Forecast for Lago di Patria</a></noscript>
 
@@ -274,7 +275,6 @@ class cityweather(LogFormatter):
                 cur_sunrise = cur_sunrise.astimezone(cur_zone)
                 cur_sunset = cur_sunset.astimezone(cur_zone)
 
-
                 # Current Date
                 cur_dt = cur_api['dt']
 
@@ -297,6 +297,26 @@ class cityweather(LogFormatter):
                 label_time1.configure(text=f"Local Time: {cur_time}")
                 label_date1.configure(text=f"{cur_date}")
 
+                # Download and display the current weather icon
+                def icons():
+                    try:
+                        r = requests.get(icon_url1, stream=True)
+                        print(icon_url1)
+                        if r.status_code == 200:
+                            r.raw.decode_content = True
+                            with open(icon1, "wb") as f:
+                                shutil.copyfileobj(r.raw, f)
+                            print(f"[*] Downloaded Image: {icon1}")
+                            weatherapp.cur_image = ImageTk.PhotoImage(Image.open(icon1))
+                    except Exception as error:
+                        print(f"[~] Error Occured with {icon1} : {error}")
+                        weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
+
+                # Icon Placement
+                icons()
+                label_icon1 = Label(weatherapp, bg='white', image=weatherapp.cur_image)
+                label_icon1.place(x=50, y=270)
+
                 # Image application
                 if cur_dt >= cur_sunrise:
                     if cur_dt <= cur_sunset:
@@ -310,10 +330,14 @@ class cityweather(LogFormatter):
                     weatherapp.day_night1 = weatherapp.night
 
                 # Theme for the respective time the application is used
-                weatherapp.cur_day_night_panel = Label(weatherapp, bg=None, image=weatherapp.day_night1)
+                weatherapp.cur_day_night_panel = Label(weatherapp, bg='white', image=weatherapp.day_night1)
                 weatherapp.cur_day_night_panel.place(x=3, y=225)
 
+
             def sat_city_info():
+                if self.init_counter == False:
+                    sat_day_night_panel.pack_forget()
+                    label_icon2.pack_forget()
                 utc = pytz.timezone('UTC')
                 # API Call
                 ######################## Needs separate gets and input cleaning to prevent issues
@@ -433,6 +457,25 @@ class cityweather(LogFormatter):
                 label_time2.configure(text=f"Local Time: {sat_time}")
                 label_date2.configure(text=f"{sat_date}")
 
+                # Download and save the appropriate weather icon
+                def icons():
+                    try:
+                        r = requests.get(icon_url2, stream=True)
+                        if r.status_code == 200:
+                            r.raw.decode_content = True
+                            with open(icon2, "wb") as f:
+                                shutil.copyfileobj(r.raw, f)
+                            print(f"[*] Downloaded Image: {icon2}")
+                            weatherapp.sat_image = ImageTk.PhotoImage(Image.open(icon2))
+                    except Exception as error:
+                        print(f"[~] Error Occured with {icon2} : {error}")
+                        weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
+
+                # Icon Placement
+                icons()
+                label_icon2 = Label(weatherapp, bg='white', image=weatherapp.sat_image)
+                label_icon2.place(x=((self.w / 2) + 70), y=270)
+
                 # Image application
                 if sat_dt >= sat_sunrise:
                     if sat_dt <= sat_sunset:
@@ -446,7 +489,7 @@ class cityweather(LogFormatter):
                     weatherapp.day_night2 = weatherapp.night
 
                 # Theme for the respective time the application is used
-                weatherapp.sat_day_night_panel = Label(weatherapp, bg=None, image=weatherapp.day_night2)
+                weatherapp.sat_day_night_panel = Label(weatherapp, bg='white', image=weatherapp.day_night2)
                 weatherapp.sat_day_night_panel.place(x=((self.w / 2) + 30), y=225)
 
 
@@ -507,53 +550,6 @@ class cityweather(LogFormatter):
             min_temp1.place(x=3, y=520)
             min_temp2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             min_temp2.place(x=((self.w/2)+3), y=520)
-
-            # Display a day / night icon to indicate the current status at the location, display the current weather icon
-            def icons(self):
-                def get_source(self):
-                    r = requests.get(icon_url1)
-                    if r.status_code == 200:
-                        return soup(r.text)
-                    else:
-                        sys.exit( "[~] Invalid Response Received." )
-
-                def filter(self, html):
-                    imgs = html.findAll( "img" )
-                    if imgs:
-                        return imgs
-                    else:
-                        sys.exit("[~] No images detected on the page.")
-
-                def requesthandle(self):
-                    try:
-                        r = requests.get(icon_url1, stream=True)
-                        if r.status_code == 200:
-                            r.raw.decode_content = True
-                            with open(name, "wb") as f:
-                                shutil.copyfileobj(r.raw, f)
-                            print(f"[*] Downloaded Image: {name}")
-                    except Exception as error:
-                        print(f"[~] Error Occured with {name} : {error}")
-
-                def get_img(self):
-                    html = get_source(self)
-                    tag = filter(self, html)
-                    src = tag.get("img")
-                    if src:
-                        src = src.groups()
-                        img = ImageTk.PhotoImage(Image.open(src))
-                        panel = Label(weatherapp, image=img)
-                        panel.place(x=1, y=200)
-                    else:
-                        img = ImageTk.PhotoImage(Image.open('img_notfound.png'))
-                        panel = Label(weatherapp, image=img)
-                        panel.place(x=1, y=200)
-
-            # Icon Placement
-            label_icon1 = Label(weatherapp, width=0, bg='white', font=("bold", 14))
-            label_icon1.place(x=3, y=220)
-            label_icon2 = Label(weatherapp, width=0, bg='white', font=("bold", 14))
-            label_icon2.place(x=((self.w/2)+3), y=220)
 
             # Note
             note = Label(weatherapp, text="All temperatures in degrees Fahrenheit", bg='white', font=("italic", 10))
