@@ -123,7 +123,7 @@ class cityweather(LogFormatter):
         self.l = 580
         self.current_city = current_city
         self.sat_city = sat_city
-        self.api_key = "x"
+        self.api_key = ""
 
     def big_timer(self):
         # 15 min timer for updating weather info
@@ -331,13 +331,10 @@ class cityweather(LogFormatter):
 
                 # Theme for the respective time the application is used
                 weatherapp.cur_day_night_panel = Label(weatherapp, bg='white', image=weatherapp.day_night1)
-                weatherapp.cur_day_night_panel.place(x=3, y=225)
+                weatherapp.cur_day_night_panel.place(x=5, y=225)
 
 
             def sat_city_info():
-                if self.init_counter == False:
-                    sat_day_night_panel.pack_forget()
-                    label_icon2.pack_forget()
                 utc = pytz.timezone('UTC')
                 # API Call
                 ######################## Needs separate gets and input cleaning to prevent issues
