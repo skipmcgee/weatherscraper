@@ -31,6 +31,8 @@ import logging.handlers
 from bs4 import BeautifulSoup
 import time
 from threading import Thread
+import threading
+import tkinter as tk
 from tkinter import *
 import requests
 import json
@@ -41,6 +43,9 @@ from pycountry_convert import country_alpha2_to_country_name
 from countryinfo import CountryInfo
 import shutil
 import concurrent.futures
+import queue
+from types import SimpleNamespace
+from enum import Enum
 
 # <script src="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/external_box_hour_by_hour.js"></script><noscript><a href="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/">yr.no: Forecast for Lago di Patria</a></noscript>
 
@@ -128,13 +133,58 @@ class cityweather(LogFormatter):
 
     def app_setup(self):
         try:
-            weatherapp = Tk()
-            weatherapp.title("DJC2 20.2 'The Looters' Weather App")
-            weatherapp.geometry(f"{self.w}x{self.l}")
-            weatherapp['background'] = "white"
-            print('top of the app')
-            weatherapp.button = False
-            weatherapp.init_counter = True
+        #     class Messages(Enum):
+        #     WRITEMSG = 1
+        #
+        # def workcycle(guiref, model, q):
+        #     msg = None
+        #     while True:
+        #         try:
+        #             msg = q.get(timeout=0.1)
+        #
+        #             if hasattr(msg, 'type'):
+        #                 if msg.type == Messages.WRITEMSG:
+        #                     bytes = bytearray(msg.entry.get().encode("ASCII"))
+        #                     model.port.write(bytes)
+        #
+        #         except queue.Empty:
+        #             pass
+        #
+        #         read = model.port.read(model.port.in_waiting)
+        #         if len(read) > 0:
+        #             guiref.label.set(read.decode())
+        #
+        # def gui(root, q):
+        #     labelVal = tk.StringVar()
+        #     entryVal = tk.StringVar()
+        #     e = tk.Entry(root, textvariable=entryVal)
+        #     l = tk.Label(root, textvariable=labelVal)
+        #     cb = lambda: q.put(SimpleNamespace(type=Messages.WRITEMSG, label=labelVal, entry=e))
+        #     b = tk.Button(root, text="Send message", command=cb)
+        #     e.pack()
+        #     b.pack()
+        #     l.pack()
+        #     return SimpleNamespace(label=labelVal)
+        #
+        #     q = queue.Queue()
+        #     root = tk.Tk()
+        #     guiref = gui(root, q)
+        #     model = SimpleNamespace(port=port)
+        #     t = threading.Thread(target=workcycle, args=(guiref, model, q))
+        #     t.daemon = True
+        #     t.start()
+        #     tk.mainloop()
+        #
+        #
+        #
+        #
+        #     weatherapp = Tk()
+        #     weatherapp.title("DJC2 20.2 'The Looters' Weather App")
+        #     weatherapp.geometry(f"{self.w}x{self.l}")
+        #     weatherapp['background'] = "white"
+        #     print('top of the app')
+        #     weatherapp.button = False
+        #     weatherapp.init_counter = True
 
             # TF 51/1 Logo Image
             logo = ImageTk.PhotoImage(Image.open('logo.png'))
@@ -615,9 +665,12 @@ class cityweather(LogFormatter):
             exit(0)
 
 
+
+
 def main():
     # Application initialization
     weatherapp = cityweather().app_setup()
+
 
 # Call the main function
 if __name__ == "__main__":
