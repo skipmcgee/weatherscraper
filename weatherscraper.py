@@ -116,7 +116,6 @@ class cityweather(LogFormatter):
     def __init__(self, current_city="Aqaba, JO", sat_city="Lago Patria, IT"):
         """ Need to really work on the documentation of this app one day """
         super().__init__()
-        self.init_counter = True
         self.button1 = False
         self.button2 = False
         self.log_message_begin()
@@ -127,13 +126,6 @@ class cityweather(LogFormatter):
         self.api_key = ""
 
 
-    def big_timer(self):
-        # 15 min timer for updating weather info
-        self.message('starting big_timer()', level=2)
-        time.sleep(10)
-        self.message('ending big_timer()', level=2)
-
-
     def app_setup(self):
         try:
             weatherapp = Tk()
@@ -141,6 +133,8 @@ class cityweather(LogFormatter):
             weatherapp.geometry(f"{self.w}x{self.l}")
             weatherapp['background'] = "white"
             print('top of the app')
+            weatherapp.button = False
+            weatherapp.init_counter = True
 
             # TF 51/1 Logo Image
             logo = ImageTk.PhotoImage(Image.open('logo.png'))
@@ -164,7 +158,7 @@ class cityweather(LogFormatter):
             city2_entry = Entry(weatherapp, font=("Helvetica", 12), justify="left", bg="white", fg='gray', textvariable=city2_name, width=29)
             city2_entry.grid(row=1, column=1, ipadx=0, ipady=4, sticky=W+N)
 
-            if self.init_counter == True:
+            if weatherapp.init_counter == True:
                 city1_entry.insert(0, self.current_city)
                 city2_entry.insert(0, self.sat_city)
 
@@ -180,6 +174,8 @@ class cityweather(LogFormatter):
             # weatherapp.day = ImageTk.PhotoImage(weatherapp.day)
 
             def cur_city_info():
+                if weatherapp.init_counter == False:
+                    weatherapp.button = True
                 utc = pytz.timezone('UTC')
                 # API Call
                 ######################## Needs separate gets and input cleaning to prevent issues
@@ -340,7 +336,10 @@ class cityweather(LogFormatter):
 
 
 
+
             def sat_city_info():
+                if weatherapp.init_counter == False:
+                    weatherapp.button = True
                 utc = pytz.timezone('UTC')
                 # API Call
                 ######################## Needs separate gets and input cleaning to prevent issues
@@ -496,6 +495,7 @@ class cityweather(LogFormatter):
                 weatherapp.sat_day_night_panel.place(x=((self.w / 2) + 30), y=225)
 
 
+
             # Country Names and Coordinates
             label_citi1 = Label(weatherapp, width=0, bg='white', font=("bold", 14))
             label_citi1.place(x=3, y=80)
@@ -558,7 +558,31 @@ class cityweather(LogFormatter):
             note = Label(weatherapp, text="All temperatures in degrees Fahrenheit", bg='white', font=("italic", 10))
             note.place(x=120, y=550)
 
+            # Call default values
+            if weatherapp.init_counter == True:
+                cur_city_info()
+                sat_city_info()
+                print('after call to info functions')
 
+            # if weatherapp.init_counter == False:
+            #     # Need to add a looping thread to conduct a 15 min sleep and then call the api for updated information
+            #     def take_a_break():
+            #         self.message('starting take_a_break()', level=2)
+            #         time.sleep(10)
+            #         self.message('ending take_a_break()', level=2)
+            #         take_a_break()
+            #     weatherapp.naptime = Thread(target=take_a_break(), daemon=True)
+            #     self.message(error="starting take_a_break() in new daemon thread")
+            #     naptime.start()
+            #     # with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            #     #     executor.map(take_a_break, range(1))
+            #
+            #     # Need logic for if either of the search buttons are clicked
+            #     if weatherapp.button == True:
+            #         self.message(error="joining take_a_break() daemon thread")
+            #         weatherapp.naptime.join()
+            #         cur_city_info()
+            #         sat_city_info()
             print('before buttons')
             # Search Button
             city_nameButton1 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=cur_city_info)
@@ -566,33 +590,8 @@ class cityweather(LogFormatter):
             city_nameButton2 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=sat_city_info)
             city_nameButton2.grid(row=1, column=2, padx=0, pady=0, sticky=W+E+N+S)
             print('after buttons')
-            # Call default values
-            if self.init_counter == True:
-                cur_city_info()
-                sat_city_info()
-                print('after call to info functions')
-            elif self.init_counter == False:
-                # Need to add a looping thread to conduct a 15 min sleep and then call the api for updated information
-                def take_a_break():
-                    print('entering the break')
-                    self.big_timer()
-                    cur_city_info()
-                    sat_city_info()
-                    take_a_break()
-                print('after take a break')
-                # with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-                #     executor.map(take_a_break, range(1))
 
-                self.naptime = Thread(target=take_a_break(), daemon=True)
-                self.message(error="starting take_a_break() in new daemon thread")
-                self.naptime.start()
-
-                # Need logic for if either of the search buttons are clicked
-                self.message(error="joining take_a_break() daemon thread")
-                self.naptime.join()
-
-
-            self.init_counter = False
+            weatherapp.init_counter = False
             weatherapp.mainloop()
 
         except ConnectionError as error:
