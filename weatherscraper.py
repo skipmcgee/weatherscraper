@@ -188,7 +188,7 @@ class cityweather(LogFormatter):
 
             # TF 51/1 Logo Image
             logo = ImageTk.PhotoImage(Image.open('logo.png'))
-            panel = Label(weatherapp, bg=None, image=logo)
+            panel = Label(weatherapp, bg='white', image=logo)
             panel.place(x=(self.w/2)-50, y=(self.l/2)-30)
 
             # Labels for Entry Fields
@@ -366,7 +366,7 @@ class cityweather(LogFormatter):
                 # Icon Placement
                 icons()
                 label_icon1 = Label(weatherapp, bg='white', image=weatherapp.cur_image)
-                label_icon1.place(x=50, y=270)
+                label_icon1.place(x=50, y=300)
 
                 # Image application
                 if cur_dt >= cur_sunrise:
@@ -526,7 +526,7 @@ class cityweather(LogFormatter):
                 # Icon Placement
                 icons()
                 label_icon2 = Label(weatherapp, bg='white', image=weatherapp.sat_image)
-                label_icon2.place(x=((self.w / 2) + 70), y=270)
+                label_icon2.place(x=((self.w / 2) + 75), y=300)
 
                 # Image application
                 if sat_dt >= sat_sunrise:
@@ -542,7 +542,7 @@ class cityweather(LogFormatter):
 
                 # Theme for the respective time the application is used
                 weatherapp.sat_day_night_panel = Label(weatherapp, bg='white', image=weatherapp.day_night2)
-                weatherapp.sat_day_night_panel.place(x=((self.w / 2) + 30), y=225)
+                weatherapp.sat_day_night_panel.place(x=((self.w / 2) + 35), y=225)
 
 
 
@@ -663,8 +663,6 @@ class cityweather(LogFormatter):
         else:
             self.log_message_end()
             exit(0)
-
-
 
 
 def main():
