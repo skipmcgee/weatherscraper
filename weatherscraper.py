@@ -366,7 +366,7 @@ class cityweather(LogFormatter):
                 # Icon Placement
                 icons()
                 label_icon1 = Label(weatherapp, bg='white', image=weatherapp.cur_image)
-                label_icon1.place(x=50, y=300)
+                label_icon1.place(x=50, y=305)
 
                 # Image application
                 if cur_dt >= cur_sunrise:
@@ -526,7 +526,7 @@ class cityweather(LogFormatter):
                 # Icon Placement
                 icons()
                 label_icon2 = Label(weatherapp, bg='white', image=weatherapp.sat_image)
-                label_icon2.place(x=((self.w / 2) + 75), y=300)
+                label_icon2.place(x=((self.w / 2) + 75), y=305)
 
                 # Image application
                 if sat_dt >= sat_sunrise:
