@@ -48,17 +48,8 @@ from types import SimpleNamespace
 from enum import Enum
 
 # <script src="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/external_box_hour_by_hour.js"></script><noscript><a href="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/">yr.no: Forecast for Lago di Patria</a></noscript>
-
-# HTML for the above: document.write('\n'
-#  + '<iframe src="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/external_box_hour_by_hour.html" width="850" height="430" frameborder="0" style="margin: 10px 0 10px 0" scrolling="no">\n'
-#  + '</iframe>\n'
-# );
-#def infoscraper(url):
-#    error_count = 0
-#    try:
-#        json_url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=40.9369&lon=14.0334&altitude=15"
-#        page = requests.get(json_url)
-#        soup = BeautifulSoup(page.content, 'html.parser')
+# JS / HTML for the above: document.write('\n' + '<iframe src="https://www.yr.no/place/Italy/Campania/Lago_di_Patria/external_box_hour_by_hour.html" width="850" height="430" frameborder="0" style="margin: 10px 0 10px 0" scrolling="no">\n'  + '</iframe>\n');
+# json_url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=40.9369&lon=14.0334&altitude=15"
 
 class LogFormatter(logging.Formatter):
     """ Basic system log message generator to identify significant events and errors for troubleshooting """
@@ -86,7 +77,7 @@ class LogFormatter(logging.Formatter):
         error = error
         self.error_count += 1
         current_time = datetime.datetime.now()
-        error = {f"'message':{error}", f"'time':{current_time}", f"'severity':{level}"}
+        error = {f"{self.application_name}, 'message':{error}", f"'time':{current_time}", f"'severity':{level}"}
         self.error_list.append(error)
         print(error)
         if level == (5 or 'CRITICAL' or 'critical'):
@@ -119,7 +110,7 @@ class LogFormatter(logging.Formatter):
 
 class cityweather(LogFormatter):
     def __init__(self, current_city="Aqaba, JO", sat_city="Lago Patria, IT"):
-        """ Need to really work on the documentation of this app one day """
+        """ Get the current weather displayed in two locations through a tkinter display. """
         super().__init__()
         self.button1 = False
         self.button2 = False
@@ -129,9 +120,15 @@ class cityweather(LogFormatter):
         self.current_city = current_city
         self.sat_city = sat_city
         self.api_key = ""
+        if self.api_key == "":
+            error = "No API Key specified, please add your API key and try again"
+            self.message(error, level=4)
+            self.log_message_end()
+            exit(1)
 
 
     def app_setup(self):
+        ''' tkinter weather application and setup '''
         try:
         #     class Messages(Enum):
         #     WRITEMSG = 1
@@ -175,9 +172,6 @@ class cityweather(LogFormatter):
         #     t.start()
         #     tk.mainloop()
 
-
-
-
             weatherapp = Tk()
             weatherapp.title("DJC2 20.2 'The Looters' Weather App")
             weatherapp.geometry(f"{self.w}x{self.l}")
@@ -202,7 +196,6 @@ class cityweather(LogFormatter):
             city1_entry = Entry(weatherapp, font=("Helvetica", 12), justify="left", bg="white", fg='gray', textvariable=city1_name, width=29)
             city1_entry.grid(row=0, column=1, ipadx=0, ipady=4, sticky=N+W)
 
-
             # Sat City Search
             city2_name = StringVar()
             city2_entry = Entry(weatherapp, font=("Helvetica", 12), justify="left", bg="white", fg='gray', textvariable=city2_name, width=29)
@@ -215,7 +208,8 @@ class cityweather(LogFormatter):
             # Day and night images loading and resizing
             weatherapp.night = ImageTk.PhotoImage(Image.open('night.png'))
             weatherapp.day = ImageTk.PhotoImage(Image.open('day.png'))
-            # If you need to resize images on the fly
+            ''' Saving the below code in case you need to resize images on the fly in the future
+            This does slow the internal mainloop cycle of tkinter so plan to call outside '''
             # weatherapp.night = Image.open('night.png')
             # weatherapp.night = weatherapp.night.resize((70, 52), Image.ANTIALIAS)
             # weatherapp.night = ImageTk.PhotoImage(weatherapp.night)
@@ -224,11 +218,12 @@ class cityweather(LogFormatter):
             # weatherapp.day = ImageTk.PhotoImage(weatherapp.day)
 
             def cur_city_info():
+                ''' Function to define or update the current information for the current or 'cur' city location,
+                pulling the recent data from the api '''
                 if weatherapp.init_counter == False:
                     weatherapp.button = True
                 utc = pytz.timezone('UTC')
                 # API Call
-                ######################## Needs separate gets and input cleaning to prevent issues
                 cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                                     + city1_entry.get() + "&units=imperial&appid=" + self.api_key)
                 cur_api = json.loads(cur_api_request.content)
@@ -264,10 +259,11 @@ class cityweather(LogFormatter):
                 cur_sunset = v['sunset']
                 cur_sunset = datetime.datetime.fromtimestamp(cur_sunset)
 
-                # Current Timezone via offset and dict search
-                # Note that getting the timezone perfectly right doesn't really matter as long as the offset is correct.
-                # However, we will get as generally close as possible here without correcting for spaces,
-                # colloquial countrynames, using state capitals or population centers to identify timezones, etc.
+                ''' Current Timezone via offset and dict search - note that getting the timezone perfectly right 
+                doesn't really matter as long as the offset is correct. However, because precision is important, 
+                we will get as reasonably close as possible here without correcting for spaces, colloquial countrynames,
+                using state capitals or population centers to identify timezones, etc. '''
+
                 cur_timeoffset = cur_api['timezone']
                 cur_timeoffset = datetime.timedelta(seconds=cur_timeoffset)
                 cur_now = datetime.datetime.now(pytz.utc)
@@ -349,22 +345,20 @@ class cityweather(LogFormatter):
                 label_date1.configure(text=f"{cur_date}")
 
                 # Download and display the current weather icon
-                def icons():
-                    try:
-                        r = requests.get(icon_url1, stream=True)
-                        print(icon_url1)
-                        if r.status_code == 200:
-                            r.raw.decode_content = True
-                            with open(icon1, "wb") as f:
-                                shutil.copyfileobj(r.raw, f)
-                            print(f"[*] Downloaded Image: {icon1}")
-                            weatherapp.cur_image = ImageTk.PhotoImage(Image.open(icon1))
-                    except Exception as error:
-                        print(f"[~] Error Occured with {icon1} : {error}")
-                        weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
+                try:
+                    r = requests.get(icon_url1, stream=True)
+                    print(icon_url1)
+                    if r.status_code == 200:
+                        r.raw.decode_content = True
+                        with open(icon1, "wb") as f:
+                            shutil.copyfileobj(r.raw, f)
+                        print(f"[*] Downloaded Image: {icon1}")
+                        weatherapp.cur_image = ImageTk.PhotoImage(Image.open(icon1))
+                except Exception as error:
+                    print(f"[~] Error Occured with {icon1} : {error}")
+                    weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
 
                 # Icon Placement
-                icons()
                 label_icon1 = Label(weatherapp, bg='white', image=weatherapp.cur_image)
                 label_icon1.place(x=50, y=305)
 
@@ -385,14 +379,13 @@ class cityweather(LogFormatter):
                 weatherapp.cur_day_night_panel.place(x=5, y=225)
 
 
-
-
             def sat_city_info():
+                ''' Function to define or update the current information for the remote or 'sat' city location,
+                pulling the recent data from the api '''
                 if weatherapp.init_counter == False:
                     weatherapp.button = True
                 utc = pytz.timezone('UTC')
                 # API Call
-                ######################## Needs separate gets and input cleaning to prevent issues
                 sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                                 + city2_entry.get() + "&units=imperial&appid=" + self.api_key)
                 sat_api = json.loads(sat_api_request.content)
@@ -510,21 +503,19 @@ class cityweather(LogFormatter):
                 label_date2.configure(text=f"{sat_date}")
 
                 # Download and save the appropriate weather icon
-                def icons():
-                    try:
-                        r = requests.get(icon_url2, stream=True)
-                        if r.status_code == 200:
-                            r.raw.decode_content = True
-                            with open(icon2, "wb") as f:
-                                shutil.copyfileobj(r.raw, f)
-                            print(f"[*] Downloaded Image: {icon2}")
-                            weatherapp.sat_image = ImageTk.PhotoImage(Image.open(icon2))
-                    except Exception as error:
-                        print(f"[~] Error Occured with {icon2} : {error}")
-                        weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
+                try:
+                    r = requests.get(icon_url2, stream=True)
+                    if r.status_code == 200:
+                        r.raw.decode_content = True
+                        with open(icon2, "wb") as f:
+                            shutil.copyfileobj(r.raw, f)
+                        print(f"[*] Downloaded Image: {icon2}")
+                        weatherapp.sat_image = ImageTk.PhotoImage(Image.open(icon2))
+                except Exception as error:
+                    print(f"[~] Error Occured with {icon2} : {error}")
+                    weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
 
                 # Icon Placement
-                icons()
                 label_icon2 = Label(weatherapp, bg='white', image=weatherapp.sat_image)
                 label_icon2.place(x=((self.w / 2) + 75), y=305)
 
@@ -545,70 +536,72 @@ class cityweather(LogFormatter):
                 weatherapp.sat_day_night_panel.place(x=((self.w / 2) + 35), y=225)
 
 
-
-            # Country Names and Coordinates
+            ''' Defining the break between the data/api calls and the rest of the mainloop for ease of reference '''
+            # Country Name Labels 
             label_citi1 = Label(weatherapp, width=0, bg='white', font=("bold", 14))
             label_citi1.place(x=3, y=80)
             label_citi2 = Label(weatherapp, width=0, bg='white', font=("bold", 14))
             label_citi2.place(x=((self.w/2)+3), y=80)
 
+            # Latitude Labels 
             label_lat1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_lat1.place(x=3, y=110)
             label_lat2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_lat2.place(x=((self.w/2)+3), y=110)
 
+            # Longitude Labels
             label_lon1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_lon1.place(x=3, y=140)
             label_lon2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_lon2.place(x=((self.w/2)+3), y=140)
 
-            # Dates
+            # Date Labels
             label_date1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_date1.place(x=3, y=200)
             label_date2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_date2.place(x=((self.w/2)+3), y=200)
 
-            # Time
+            # Time Labels 
             label_time1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_time1.place(x=3, y=170)
             label_time2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_time2.place(x=((self.w/2)+3), y=170)
 
-            # Weather Description
+            # Weather Description Labels
             label_descrip1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 14))
             label_descrip1.place(x=3, y=400)
             label_descrip2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 14))
             label_descrip2.place(x=((self.w/2)+3), y=400)
 
-            # Current Temperature
+            # Current Temperature Labels
             label_temp1 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 14))
             label_temp1.place(x=3, y=430)
             label_temp2 = Label(weatherapp, text="ERROR", width=0, bg='white', font=("Helvetica", 14))
             label_temp2.place(x=((self.w/2)+3), y=430)
 
-            # Humidity
+            # Humidity Labels
             label_humidity1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_humidity1.place(x=3, y=460)
             label_humidity2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_humidity2.place(x=((self.w/2)+3), y=460)
 
-            # Max Temperature
+            # Max Temperature Labels
             max_temp1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             max_temp1.place(x=3, y=490)
             max_temp2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             max_temp2.place(x=((self.w/2)+3), y=490)
 
-            # Min Temperature
+            # Min Temperature Labels
             min_temp1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             min_temp1.place(x=3, y=520)
             min_temp2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             min_temp2.place(x=((self.w/2)+3), y=520)
 
-            # Note
+            # Note at the bottom of the application label and definition
             note = Label(weatherapp, text="All temperatures in degrees Fahrenheit", bg='white', font=("italic", 10))
             note.place(x=120, y=550)
 
-            # Call default values
+            # Wrapper to call the api for the first instance / establish the default values for the application
             if weatherapp.init_counter == True:
                 cur_city_info()
                 sat_city_info()
@@ -651,7 +644,6 @@ class cityweather(LogFormatter):
         ########################  Need to add exceptionhandling for incorrect names, api can't locate city, other expected exceptions
         except Exception as error:
             self.message(error, level=4)
-            self.log_message_end()
             self.app_exit()
 
 
