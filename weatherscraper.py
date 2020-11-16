@@ -93,7 +93,8 @@ class LogFormatter(logging.Formatter):
 
     def log_message_errorsum(self):
         errormessage = f"Sum of errors in {self.application_name}, 'total_error_count'={self.error_count};"
-        logging.warning(errormessage)
+        print(errormessage)
+        logging.info(errormessage)
 
     # Identifies application completion and records the total number of errors encountered
     def log_message_end(self):
@@ -101,11 +102,10 @@ class LogFormatter(logging.Formatter):
         self.runtime = self.end_time - self.start_time
         end_message = f"Ending: {self.application_name}, 'end_time'={self.end_time}, 'run_time'={self.runtime};"
         print(end_message)
-        print(self.log_message_errorsum)
-        logging.info(self.log_message_errorsum)
+        self.log_message_errorsum()
         logging.info(end_message)
 
-##### Division between Classes identified for increased visibility when editing
+''' Division between Classes identified for increased visibility when editing '''
 
 
 class cityweather(LogFormatter):
@@ -129,6 +129,7 @@ class cityweather(LogFormatter):
 
     def app_setup(self):
         ''' tkinter weather application and setup '''
+        print("Building the tkinter mainloop....")
         try:
         #     class Messages(Enum):
         #     WRITEMSG = 1
@@ -176,7 +177,6 @@ class cityweather(LogFormatter):
             weatherapp.title("DJC2 20.2 'The Looters' Weather App")
             weatherapp.geometry(f"{self.w}x{self.l}")
             weatherapp['background'] = "white"
-            print('top of the app')
             weatherapp.button = False
             weatherapp.init_counter = True
 
@@ -220,6 +220,7 @@ class cityweather(LogFormatter):
             def cur_city_info():
                 ''' Function to define or update the current information for the current or 'cur' city location,
                 pulling the recent data from the api '''
+                print(f"Getting weather data for {self.current_city}....")
                 if weatherapp.init_counter == False:
                     weatherapp.button = True
                 utc = pytz.timezone('UTC')
@@ -276,46 +277,46 @@ class cityweather(LogFormatter):
                 if len(cur_offset_matches) > 1:
                     cur_firstchoice, cur_secondchoice = [], []
                     try:
-                        print(f'searching for {citi2}')
+                        print(f'Searching for {citi2}....')
                         cur_firstchoice += [listitem for listitem in cur_offset_matches if citi1 in listitem]
                     except:
                         pass
                     try:
-                        print(f'searching for {country2}')
+                        print(f'Searching for {country2}....')
                         cur_firstchoice += [listitem for listitem in cur_offset_matches if country1 in listitem]
                     except:
                         pass
                     if len(cur_firstchoice) == 0:
                         try:
-                            print(f'searching for {cur_capital}')
+                            print(f'Searching for {cur_capital}....')
                             cur_firstchoice += [listitem for listitem in cur_offset_matches if cur_capital in listitem]
                         except:
                             pass
                     try:
-                        print(f'searching for {cur_countryname}')
+                        print(f'Searching for {cur_countryname}....')
                         cur_firstchoice += [listitem for listitem in cur_offset_matches if cur_countryname in listitem]
                     except:
                         pass
                     if len(cur_firstchoice) >= 2:
                         try:
-                            print(f'searching for {citi1}')
+                            print(f'Searching for {citi1}....')
                             cur_secondchoice += [listitem for listitem in cur_firstchoice if citi1 in listitem]
                             if cur_secondchoice != '':
                                 cur_firstchoice.insert(0, cur_secondchoice[0])
                             else:
-                                print(f"city {city1} not found")
+                                print(f"City {city1} not found.")
                             cur_secondchoice += [listitem for listitem in cur_firstchoice if cur_capital in listitem]
                             if cur_secondchoice != '':
                                 cur_firstchoice.insert(0, cur_secondchoice[0])
                             else:
-                                print(f"capital {cur_capital} not found")
+                                print(f"Capital city {cur_capital} not found.")
                         except:
                             pass
                     if len(cur_firstchoice) == 0:
                         cur_firstchoice = cur_offset_matches
-                    print(f'available timezones: {cur_firstchoice}')
+                    print(f'Available timezones: {cur_firstchoice}.')
                     cur_zone = ''.join(cur_firstchoice[0])
-                    print(f'picked timezone: {cur_zone}')
+                    print(f'Picked timezone: {cur_zone}.')
                 else:
                     cur_zone = ''.join(cur_offset_matches)
                 cur_zone = pytz.timezone(cur_zone)
@@ -352,10 +353,10 @@ class cityweather(LogFormatter):
                         r.raw.decode_content = True
                         with open(icon1, "wb") as f:
                             shutil.copyfileobj(r.raw, f)
-                        print(f"[*] Downloaded Image: {icon1}")
+                        print(f"[*] Downloaded Image: {icon1}.")
                         weatherapp.cur_image = ImageTk.PhotoImage(Image.open(icon1))
                 except Exception as error:
-                    print(f"[~] Error Occured with {icon1} : {error}")
+                    print(f"[~] Error Occured with {icon1} : {error}.")
                     weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
 
                 # Icon Placement
@@ -365,10 +366,10 @@ class cityweather(LogFormatter):
                 # Image application
                 if cur_dt >= cur_sunrise:
                     if cur_dt <= cur_sunset:
-                        print("day")
+                        print(f"In {self.current_city} it is currently daytime.")
                         weatherapp.day_night1 = weatherapp.day
                     else:
-                        print('night1')
+                        print(f"In {self.current_city} it is currently nighttime.")
                         weatherapp.day_night1 = weatherapp.night
                 else:
                     print('night2')
@@ -382,6 +383,7 @@ class cityweather(LogFormatter):
             def sat_city_info():
                 ''' Function to define or update the current information for the remote or 'sat' city location,
                 pulling the recent data from the api '''
+                print(f"Getting weather data for {self.sat_city}....")
                 if weatherapp.init_counter == False:
                     weatherapp.button = True
                 utc = pytz.timezone('UTC')
@@ -435,46 +437,46 @@ class cityweather(LogFormatter):
                 if len(sat_offset_matches) > 1:
                     sat_firstchoice, sat_secondchoice = [], []
                     try:
-                        print(f'searching for {citi2}')
+                        print(f'Searching for {citi2}....')
                         sat_firstchoice += [listitem for listitem in sat_offset_matches if citi2 in listitem]
                     except:
                         pass
                     try:
-                        print(f'searching for {country2}')
+                        print(f'Searching for {country2}....')
                         sat_firstchoice += [listitem for listitem in sat_offset_matches if country2 in listitem]
                     except:
                         pass
                     if len(sat_firstchoice) == 0:
                         try:
-                            print(f'searching for {sat_capital}')
+                            print(f'Searching for {sat_capital}....')
                             sat_firstchoice += [listitem for listitem in sat_offset_matches if sat_capital in listitem]
                         except:
                             pass
                     try:
-                        print(f'searching for {sat_countryname}')
+                        print(f'Searching for {sat_countryname}....')
                         sat_firstchoice += [listitem for listitem in sat_offset_matches if sat_countryname in listitem]
                     except:
                         pass
                     if len(sat_firstchoice) >= 2:
                         try:
-                            print(f'searching for {citi2}')
+                            print(f'Searching for {citi2}...')
                             sat_secondchoice += [listitem for listitem in sat_firstchoice if citi2 in listitem]
                             if sat_secondchoice != '':
                                 sat_firstchoice.insert(0, sat_secondchoice[0])
                             else:
-                                print(f"city {city2} not found")
+                                print(f"City {city2} not found!")
                             sat_secondchoice += [listitem for listitem in sat_firstchoice if sat_capital in listitem]
                             if sat_secondchoice != '':
                                 sat_firstchoice.insert(0, sat_secondchoice[0])
                             else:
-                                print(f"capital {sat_capital} not found")
+                                print(f"Capital city {sat_capital} not found!")
                         except:
                             pass
                     if len(sat_firstchoice) == 0:
                         sat_firstchoice = sat_offset_matches
-                    print(f'available timezones: {sat_firstchoice}')
+                    print(f'Available timezones: {sat_firstchoice}.')
                     sat_zone = ''.join(sat_firstchoice[0])
-                    print(f'picked timezone: {sat_zone}')
+                    print(f'Picked timezone: {sat_zone}.')
                 else:
                     sat_zone = ''.join(sat_offset_matches)
                 sat_zone = pytz.timezone(sat_zone)
@@ -509,10 +511,10 @@ class cityweather(LogFormatter):
                         r.raw.decode_content = True
                         with open(icon2, "wb") as f:
                             shutil.copyfileobj(r.raw, f)
-                        print(f"[*] Downloaded Image: {icon2}")
+                        print(f"[*] Downloaded Image: {icon2}.")
                         weatherapp.sat_image = ImageTk.PhotoImage(Image.open(icon2))
                 except Exception as error:
-                    print(f"[~] Error Occured with {icon2} : {error}")
+                    print(f"[~] Error Occured with {icon2} : {error}.")
                     weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
 
                 # Icon Placement
@@ -522,10 +524,10 @@ class cityweather(LogFormatter):
                 # Image application
                 if sat_dt >= sat_sunrise:
                     if sat_dt <= sat_sunset:
-                        print('day')
+                        print(f"In {self.sat_city} it is currently daytime.")
                         weatherapp.day_night2 = weatherapp.day
                     else:
-                        print('night1')
+                        print(f"In {self.sat_city} it is currently nighttime.")
                         weatherapp.day_night2 = weatherapp.night
                 else:
                     print('night2')
@@ -537,13 +539,13 @@ class cityweather(LogFormatter):
 
 
             ''' Defining the break between the data/api calls and the rest of the mainloop for ease of reference '''
-            # Country Name Labels 
+            # Country Name Labels
             label_citi1 = Label(weatherapp, width=0, bg='white', font=("bold", 14))
             label_citi1.place(x=3, y=80)
             label_citi2 = Label(weatherapp, width=0, bg='white', font=("bold", 14))
             label_citi2.place(x=((self.w/2)+3), y=80)
 
-            # Latitude Labels 
+            # Latitude Labels
             label_lat1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_lat1.place(x=3, y=110)
             label_lat2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
@@ -561,7 +563,7 @@ class cityweather(LogFormatter):
             label_date2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_date2.place(x=((self.w/2)+3), y=200)
 
-            # Time Labels 
+            # Time Labels
             label_time1 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
             label_time1.place(x=3, y=170)
             label_time2 = Label(weatherapp, width=0, bg='white', font=("Helvetica", 14))
@@ -602,10 +604,10 @@ class cityweather(LogFormatter):
             note.place(x=120, y=550)
 
             # Wrapper to call the api for the first instance / establish the default values for the application
+            print("Initial layout built, over to data input functions....")
             if weatherapp.init_counter == True:
                 cur_city_info()
                 sat_city_info()
-                print('after call to info functions')
 
             # if weatherapp.init_counter == False:
             #     # Need to add a looping thread to conduct a 15 min sleep and then call the api for updated information
@@ -626,23 +628,25 @@ class cityweather(LogFormatter):
             #         weatherapp.naptime.join()
             #         cur_city_info()
             #         sat_city_info()
-            print('before buttons')
+
+
             # Search Button
             city_nameButton1 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=cur_city_info)
             city_nameButton1.grid(row=0, column=2, padx=0, pady=0, sticky=W+E+N+S)
             city_nameButton2 = Button(weatherapp, font=("Helvetica", 12), text="Search", command=sat_city_info)
             city_nameButton2.grid(row=1, column=2, padx=0, pady=0, sticky=W+E+N+S)
-            print('after buttons')
 
             weatherapp.init_counter = False
+            print("App functioning, waiting for search button to be pressed.")
             weatherapp.mainloop()
 
         except ConnectionError as error:
-            error = error
+            print("Network connection issue prevents application from running")
             self.message(error, level=4)
 
         ########################  Need to add exceptionhandling for incorrect names, api can't locate city, other expected exceptions
         except Exception as error:
+            print(error)
             self.message(error, level=4)
             self.app_exit()
 
