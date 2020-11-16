@@ -347,16 +347,16 @@ class cityweather(LogFormatter):
 
                 # Download and display the current weather icon
                 try:
+                    print(f"Trying to download icon from: {icon_url1}.")
                     r = requests.get(icon_url1, stream=True)
-                    print(icon_url1)
                     if r.status_code == 200:
                         r.raw.decode_content = True
                         with open(icon1, "wb") as f:
                             shutil.copyfileobj(r.raw, f)
-                        print(f"[*] Downloaded Image: {icon1}.")
+                        print(f"Downloaded image: {icon1}.")
                         weatherapp.cur_image = ImageTk.PhotoImage(Image.open(icon1))
                 except Exception as error:
-                    print(f"[~] Error Occured with {icon1} : {error}.")
+                    print(f"Error occured with downloading {icon1}: {error}.")
                     weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
 
                 # Icon Placement
@@ -506,15 +506,16 @@ class cityweather(LogFormatter):
 
                 # Download and save the appropriate weather icon
                 try:
+                    print(f"Trying to download icon from: {icon_url2}.")
                     r = requests.get(icon_url2, stream=True)
                     if r.status_code == 200:
                         r.raw.decode_content = True
                         with open(icon2, "wb") as f:
                             shutil.copyfileobj(r.raw, f)
-                        print(f"[*] Downloaded Image: {icon2}.")
+                        print(f"Downloaded image: {icon2}.")
                         weatherapp.sat_image = ImageTk.PhotoImage(Image.open(icon2))
                 except Exception as error:
-                    print(f"[~] Error Occured with {icon2} : {error}.")
+                    print(f"Error occured with downloading {icon2}: {error}.")
                     weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
 
                 # Icon Placement
