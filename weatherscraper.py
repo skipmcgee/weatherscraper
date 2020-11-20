@@ -9,7 +9,7 @@
 #
 # This application is designed to display the current weather at your location + the current weather
 # at a second location of your choosing (like for hub/spoke satellite sites, etc.). Leave this application
-# running in your COC and it also provides a helpful network checker to can inform you of significant
+# running in your COC and it also provides a helpful network checker to inform you of significant
 # network interruptions / issues.
 #
 # In order to access the API that we use in this application,
