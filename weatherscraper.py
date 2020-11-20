@@ -365,10 +365,10 @@ class cityweather(LogFormatter):
                         weatherapp.cur_image = ImageTk.PhotoImage(Image.open(icon1))
                     else:
                         print(f"Received HTTP status code {r.status_code} while trying to download {icon1}.")
-                        weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
+                        weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.jpeg'))
                 except Exception as error:
                     print(f"Error occured with downloading {icon1}: {error}.")
-                    weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
+                    weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.jpeg'))
 
                 # Icon Placement
                 label_icon1 = Label(weatherapp, bg='white', image=weatherapp.cur_image)
@@ -534,10 +534,10 @@ class cityweather(LogFormatter):
                         weatherapp.sat_image = ImageTk.PhotoImage(Image.open(icon2))
                     else:
                         print(f"Received HTTP status code {r.status_code} while trying to download {icon2}.")
-                        weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
+                        weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.jpeg'))
                 except Exception as error:
                     print(f"Error occured with downloading {icon2}: {error}.")
-                    weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
+                    weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.jpeg'))
 
                 # Icon Placement
                 label_icon2 = Label(weatherapp, bg='white', image=weatherapp.sat_image)
