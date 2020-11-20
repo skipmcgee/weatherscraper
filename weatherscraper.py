@@ -665,6 +665,7 @@ class cityweather(LogFormatter):
         except ConnectionError as error:
             print("Network connection issue prevents the weatherscraper application from running.")
             self.message(error, level=4)
+            time.sleep(10)
 
         except KeyError as error:
             print("The input location not known, please try again in City, CO format.")
