@@ -2,7 +2,7 @@
 
 ############################################################################################################
 #
-# Created by Skip McGee for DJC2 20.2 AKA "The Looters" on 20201020.
+# Created by Skip McGee for DJC2 20.2 AKA "The Looters" on 20201120.
 #
 # Ever need want to check if the distant end of a satellite connection is masking equipment
 # problems as "weather problems"?
@@ -34,6 +34,7 @@ from threading import Thread
 import threading
 import tkinter as tk
 from tkinter import *
+from tkinter import messagebox
 import requests
 import json
 import datetime
@@ -227,7 +228,14 @@ class cityweather(LogFormatter):
                 # API Call
                 cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                                     + city1_entry.get() + "&units=imperial&appid=" + self.api_key)
-                cur_api = json.loads(cur_api_request.content)
+                if sat_api_request.status_code != 200:
+                    messagebox.showwarning("Warning", f"Current city API HTTP Status code is "
+                                                      f"{cur_api_request.status_code}, resetting to defaults. \n"
+                                                      f"Check your spelling and try again.")
+                    print(f"Satellite city API HTTP Status code is {cur_api_request.status_code}.")
+                    raise KeyError
+                else:
+                    cur_api = json.loads(cur_api_request.content)
 
                 # Current City Temperatures
                 z = cur_api['main']
@@ -355,6 +363,9 @@ class cityweather(LogFormatter):
                             shutil.copyfileobj(r.raw, f)
                         print(f"Downloaded image: {icon1}.")
                         weatherapp.cur_image = ImageTk.PhotoImage(Image.open(icon1))
+                    else:
+                        print(f"Received http status code {r.status_code} while trying to download {icon1}.")
+                        weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
                 except Exception as error:
                     print(f"Error occured with downloading {icon1}: {error}.")
                     weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
@@ -390,7 +401,14 @@ class cityweather(LogFormatter):
                 # API Call
                 sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                                 + city2_entry.get() + "&units=imperial&appid=" + self.api_key)
-                sat_api = json.loads(sat_api_request.content)
+                if sat_api_request.status_code != 200:
+                    messagebox.showwarning("Warning", f"Satellite city API HTTP Status code is "
+                                                      f"{sat_api_request.status_code}, resetting to defaults. \n"
+                                                      f"Check your spelling and try again.")
+                    print(f"Satellite city API HTTP Status code is {sat_api_request.status_code}.")
+                    raise KeyError
+                else:
+                    sat_api = json.loads(sat_api_request.content)
 
                 # Satellite City Temperatures
                 a = sat_api['main']
@@ -459,7 +477,7 @@ class cityweather(LogFormatter):
                         pass
                     if len(sat_firstchoice) >= 2:
                         try:
-                            print(f'Searching for {citi2}...')
+                            print(f'Searching for {citi2}....')
                             sat_secondchoice += [listitem for listitem in sat_firstchoice if citi2 in listitem]
                             if sat_secondchoice != '':
                                 sat_firstchoice.insert(0, sat_secondchoice[0])
@@ -514,6 +532,9 @@ class cityweather(LogFormatter):
                             shutil.copyfileobj(r.raw, f)
                         print(f"Downloaded image: {icon2}.")
                         weatherapp.sat_image = ImageTk.PhotoImage(Image.open(icon2))
+                    else:
+                        print(f"Received http status code {r.status_code} while trying to download {icon2}.")
+                        weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
                 except Exception as error:
                     print(f"Error occured with downloading {icon2}: {error}.")
                     weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
@@ -642,11 +663,11 @@ class cityweather(LogFormatter):
             weatherapp.mainloop()
 
         except ConnectionError as error:
-            print("Network connection issue prevents application from running")
+            print("Network connection issue prevents the weatherscraper application from running.")
             self.message(error, level=4)
 
         except KeyError as error:
-            print("Location not known, please try again")
+            print("The input location not known, please try again in City, CO format.")
             self.message(error, level=4)
 
         except KeyboardInterrupt as error:
@@ -654,7 +675,6 @@ class cityweather(LogFormatter):
             self.message(error, level=4)
             self.app_exit()
 
-        ########################  Need to add exceptionhandling for incorrect names, api can't locate city, other expected exceptions
         except Exception as error:
             print(error)
             self.message(error, level=4)
