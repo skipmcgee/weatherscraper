@@ -645,6 +645,15 @@ class cityweather(LogFormatter):
             print("Network connection issue prevents application from running")
             self.message(error, level=4)
 
+        except KeyError as error:
+            print("Location not known, please try again")
+            self.message(error, level=4)
+
+        except KeyboardInterrupt as error:
+            print("Exiting properly per user request.")
+            self.message(error, level=4)
+            self.app_exit()
+
         ########################  Need to add exceptionhandling for incorrect names, api can't locate city, other expected exceptions
         except Exception as error:
             print(error)
