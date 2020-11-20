@@ -229,7 +229,7 @@ class cityweather(LogFormatter):
                 cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                                     + city1_entry.get() + "&units=imperial&appid=" + self.api_key)
                 if cur_api_request.status_code != 200:
-                    messagebox.showwarning("Warning", f"Current city API HTTP Status code is "
+                    messagebox.showwarning("Weather App Warning", f"Current city API HTTP Status code is "
                                                       f"{cur_api_request.status_code}, resetting to defaults. \n"
                                                       f"Check your spelling and try again.")
                     print(f"Satellite city API HTTP Status code is {cur_api_request.status_code}.")
@@ -402,7 +402,7 @@ class cityweather(LogFormatter):
                 sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
                                                 + city2_entry.get() + "&units=imperial&appid=" + self.api_key)
                 if sat_api_request.status_code != 200:
-                    messagebox.showwarning("Warning", f"Satellite city API HTTP Status code is "
+                    messagebox.showwarning("Weather App Warning", f"Satellite city API HTTP Status code is "
                                                       f"{sat_api_request.status_code}, resetting to defaults. \n"
                                                       f"Check your spelling and try again.")
                     print(f"Satellite city API HTTP Status code is {sat_api_request.status_code}.")
