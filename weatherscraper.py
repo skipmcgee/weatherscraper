@@ -364,7 +364,7 @@ class cityweather(LogFormatter):
                         print(f"Downloaded image: {icon1}.")
                         weatherapp.cur_image = ImageTk.PhotoImage(Image.open(icon1))
                     else:
-                        print(f"Received http status code {r.status_code} while trying to download {icon1}.")
+                        print(f"Received HTTP status code {r.status_code} while trying to download {icon1}.")
                         weatherapp.cur_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
                 except Exception as error:
                     print(f"Error occured with downloading {icon1}: {error}.")
@@ -533,7 +533,7 @@ class cityweather(LogFormatter):
                         print(f"Downloaded image: {icon2}.")
                         weatherapp.sat_image = ImageTk.PhotoImage(Image.open(icon2))
                     else:
-                        print(f"Received http status code {r.status_code} while trying to download {icon2}.")
+                        print(f"Received HTTP status code {r.status_code} while trying to download {icon2}.")
                         weatherapp.sat_image = ImageTk.PhotoImage(Image.open('img_notfound.png'))
                 except Exception as error:
                     print(f"Error occured with downloading {icon2}: {error}.")
