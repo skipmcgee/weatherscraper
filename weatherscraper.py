@@ -285,12 +285,12 @@ class cityweather(LogFormatter):
                 if len(cur_offset_matches) > 1:
                     cur_firstchoice, cur_secondchoice = [], []
                     try:
-                        print(f'Searching for {citi2}....')
+                        print(f'Searching for {citi1}....')
                         cur_firstchoice += [listitem for listitem in cur_offset_matches if citi1 in listitem]
                     except:
                         pass
                     try:
-                        print(f'Searching for {country2}....')
+                        print(f'Searching for {country1}....')
                         cur_firstchoice += [listitem for listitem in cur_offset_matches if country1 in listitem]
                     except:
                         pass
