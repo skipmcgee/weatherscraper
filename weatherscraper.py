@@ -8,9 +8,8 @@
 # problems as "weather problems"?
 #
 # This application is designed to display the current weather at your location + the current weather
-# at a second location of your choosing (like for hub/spoke satellite sites, etc.). Leave this application
-# running in your COC and it also provides a helpful network checker to inform you of significant
-# network interruptions / issues.
+# at a second location of your choosing (like for hub/spoke satellite sites, etc.). Note that the 
+# API this application relieson is updated approximately every 15 minutes.
 #
 # In order to access the API that we use in this application,
 # Browse to: https://openweathermap.org/api
@@ -132,48 +131,6 @@ class cityweather(LogFormatter):
         ''' tkinter weather application and setup '''
         print("Building the tkinter mainloop....")
         try:
-        #     class Messages(Enum):
-        #     WRITEMSG = 1
-        #
-        # def workcycle(guiref, model, q):
-        #     msg = None
-        #     while True:
-        #         try:
-        #             msg = q.get(timeout=0.1)
-        #
-        #             if hasattr(msg, 'type'):
-        #                 if msg.type == Messages.WRITEMSG:
-        #                     bytes = bytearray(msg.entry.get().encode("ASCII"))
-        #                     model.port.write(bytes)
-        #
-        #         except queue.Empty:
-        #             pass
-        #
-        #         read = model.port.read(model.port.in_waiting)
-        #         if len(read) > 0:
-        #             guiref.label.set(read.decode())
-        #
-        # def gui(root, q):
-        #     labelVal = tk.StringVar()
-        #     entryVal = tk.StringVar()
-        #     e = tk.Entry(root, textvariable=entryVal)
-        #     l = tk.Label(root, textvariable=labelVal)
-        #     cb = lambda: q.put(SimpleNamespace(type=Messages.WRITEMSG, label=labelVal, entry=e))
-        #     b = tk.Button(root, text="Send message", command=cb)
-        #     e.pack()
-        #     b.pack()
-        #     l.pack()
-        #     return SimpleNamespace(label=labelVal)
-        #
-        #     q = queue.Queue()
-        #     root = tk.Tk()
-        #     guiref = gui(root, q)
-        #     model = SimpleNamespace(port=port)
-        #     t = threading.Thread(target=workcycle, args=(guiref, model, q))
-        #     t.daemon = True
-        #     t.start()
-        #     tk.mainloop()
-
             weatherapp = Tk()
             weatherapp.title("DJC2 20.2 'The Looters' Weather App")
             weatherapp.geometry(f"{self.w}x{self.l}")
@@ -630,26 +587,6 @@ class cityweather(LogFormatter):
             if weatherapp.init_counter == True:
                 cur_city_info()
                 sat_city_info()
-
-            # if weatherapp.init_counter == False:
-            #     # Need to add a looping thread to conduct a 15 min sleep and then call the api for updated information
-            #     def take_a_break():
-            #         self.message('starting take_a_break()', level=2)
-            #         time.sleep(10)
-            #         self.message('ending take_a_break()', level=2)
-            #         take_a_break()
-            #     weatherapp.naptime = Thread(target=take_a_break(), daemon=True)
-            #     self.message(error="starting take_a_break() in new daemon thread")
-            #     naptime.start()
-            #     # with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-            #     #     executor.map(take_a_break, range(1))
-            #
-            #     # Need logic for if either of the search buttons are clicked
-            #     if weatherapp.button == True:
-            #         self.message(error="joining take_a_break() daemon thread")
-            #         weatherapp.naptime.join()
-            #         cur_city_info()
-            #         sat_city_info()
 
 
             # Search Button
