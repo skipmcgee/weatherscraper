@@ -1,7 +1,7 @@
 # weatherscraper application
 Ever need to check if the distant end of a satellite connection is masking equipment problems as "weather problems"? Ever need to monitor the current weather in two separate locations?
 #
-This application is designed to display the current weather at your location + the current weather at a second location of your choosing (such as hub/spoke satellite sites, etc.).
+This application is designed to display the current weather at your location + the current weather at a second location of your choosing (such as hub/spoke satellite sites, etc.). Note that the API data is updated approximately every 15 minutes, so a new search will be accurate within that time period.
 #
 In order to access the API utilized in this application: 
 - Browse to: https://openweathermap.org/api
