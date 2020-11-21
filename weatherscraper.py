@@ -109,7 +109,7 @@ class LogFormatter(logging.Formatter):
 
 
 class cityweather(LogFormatter):
-    def __init__(self, current_city="Aqaba, JO", sat_city="Lago Patria, IT"):
+    def __init__(self, cur_city="Aqaba, JO", sat_city="Lago Patria, IT"):
         """ Get the current weather displayed in two locations through a tkinter display. """
         super().__init__()
         self.button1 = False
@@ -117,7 +117,7 @@ class cityweather(LogFormatter):
         self.log_message_begin()
         self.w = 460
         self.l = 580
-        self.current_city = current_city
+        self.cur_city = cur_city
         self.sat_city = sat_city
         self.api_key = ""
         if self.api_key == "":
@@ -160,7 +160,7 @@ class cityweather(LogFormatter):
             city2_entry.grid(row=1, column=1, ipadx=0, ipady=4, sticky=W+N)
 
             if weatherapp.init_counter == True:
-                city1_entry.insert(0, self.current_city)
+                city1_entry.insert(0, self.cur_city)
                 city2_entry.insert(0, self.sat_city)
 
             # Day and night images loading and resizing
@@ -178,8 +178,8 @@ class cityweather(LogFormatter):
             def cur_city_info():
                 ''' Function to define or update the current information for the current or 'cur' city location,
                 pulling the recent data from the api '''
-                self.current_city = city1_entry.get()
-                print(f"Getting weather data for {self.current_city}....")
+                self.cur_city = city1_entry.get()
+                print(f"Getting weather data for {self.cur_city}....")
                 if weatherapp.init_counter == False:
                     weatherapp.button = True
                 utc = pytz.timezone('UTC')
@@ -335,13 +335,13 @@ class cityweather(LogFormatter):
                 # Image application
                 if cur_dt >= cur_sunrise:
                     if cur_dt <= cur_sunset:
-                        print(f"In {self.current_city} it is currently daytime.")
+                        print(f"In {self.cur_city} it is currently daytime.")
                         weatherapp.day_night1 = weatherapp.day
                     else:
-                        print(f"In {self.current_city} it is currently nighttime.")
+                        print(f"In {self.cur_city} it is currently nighttime.")
                         weatherapp.day_night1 = weatherapp.night
                 else:
-                    print(f"In {self.current_city} it is currently nighttime.")
+                    print(f"In {self.cur_city} it is currently nighttime.")
                     weatherapp.day_night1 = weatherapp.night
 
                 # Theme for the respective time the application is used
