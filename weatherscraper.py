@@ -8,7 +8,7 @@
 # problems as "weather problems"?
 #
 # This application is designed to display the current weather at your location + the current weather
-# at a second location of your choosing (like for hub/spoke satellite sites, etc.). Note that the 
+# at a second location of your choosing (like for hub/spoke satellite sites, etc.). Note that the
 # API this application relieson is updated approximately every 15 minutes.
 #
 # In order to access the API that we use in this application,
@@ -178,6 +178,7 @@ class cityweather(LogFormatter):
             def cur_city_info():
                 ''' Function to define or update the current information for the current or 'cur' city location,
                 pulling the recent data from the api '''
+                self.current_city = city1_entry.get()
                 print(f"Getting weather data for {self.current_city}....")
                 if weatherapp.init_counter == False:
                     weatherapp.button = True
@@ -340,7 +341,7 @@ class cityweather(LogFormatter):
                         print(f"In {self.current_city} it is currently nighttime.")
                         weatherapp.day_night1 = weatherapp.night
                 else:
-                    print('night2')
+                    print(f"In {self.current_city} it is currently nighttime.")
                     weatherapp.day_night1 = weatherapp.night
 
                 # Theme for the respective time the application is used
@@ -351,6 +352,7 @@ class cityweather(LogFormatter):
             def sat_city_info():
                 ''' Function to define or update the current information for the remote or 'sat' city location,
                 pulling the recent data from the api '''
+                self.sat_city = city2_entry.get()
                 print(f"Getting weather data for {self.sat_city}....")
                 if weatherapp.init_counter == False:
                     weatherapp.button = True
@@ -509,7 +511,7 @@ class cityweather(LogFormatter):
                         print(f"In {self.sat_city} it is currently nighttime.")
                         weatherapp.day_night2 = weatherapp.night
                 else:
-                    print('night2')
+                    print(f"In {self.sat_city} it is currently nighttime.")
                     weatherapp.day_night2 = weatherapp.night
 
                 # Theme for the respective time the application is used
