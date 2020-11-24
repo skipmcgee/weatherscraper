@@ -185,12 +185,12 @@ class cityweather(LogFormatter):
                 utc = pytz.timezone('UTC')
                 # API Call
                 cur_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
-                                                    + city1_entry.get() + "&units=imperial&appid=" + self.api_key)
+                                                    + self.cur_city + "&units=imperial&appid=" + self.api_key)
                 if cur_api_request.status_code != 200:
-                    messagebox.showwarning("Weather App Warning", f"Current city API HTTP Status code is "
-                                                      f"{cur_api_request.status_code}, resetting to defaults. \n"
-                                                      f"Check your spelling and try again.")
-                    print(f"Satellite city API HTTP Status code is {cur_api_request.status_code}.")
+                    messagebox.showwarning("Weather App Warning", f"HTTP Status code for API request to '{self.cur_city}' is "
+                                                      f"{cur_api_request.status_code}. \n"
+                                                      f"Please check your spelling and try again.")
+                    print(f"{self.cur_city} API HTTP Status code is {cur_api_request.status_code}.")
                     raise KeyError
                 else:
                     cur_api = json.loads(cur_api_request.content)
@@ -361,12 +361,12 @@ class cityweather(LogFormatter):
                 utc = pytz.timezone('UTC')
                 # API Call
                 sat_api_request = requests.get("https://api.openweathermap.org/data/2.5/weather?q="
-                                                + city2_entry.get() + "&units=imperial&appid=" + self.api_key)
+                                                + self.sat_city + "&units=imperial&appid=" + self.api_key)
                 if sat_api_request.status_code != 200:
-                    messagebox.showwarning("Weather App Warning", f"Satellite city API HTTP Status code is "
-                                                      f"{sat_api_request.status_code}, resetting to defaults. \n"
-                                                      f"Check your spelling and try again.")
-                    print(f"Satellite city API HTTP Status code is {sat_api_request.status_code}.")
+                    messagebox.showwarning("Weather App Warning", f"HTTP Status code for API request to '{self.sat_city}' is "
+                                                      f"{sat_api_request.status_code}. \n"
+                                                      f"Please check your spelling and try again.")
+                    print(f"{self.sat_city} API HTTP Status code is {sat_api_request.status_code}.")
                     raise KeyError
                 else:
                     sat_api = json.loads(sat_api_request.content)
@@ -642,5 +642,4 @@ def main():
 
 # Call the main function
 if __name__ == "__main__":
-    main()
 
