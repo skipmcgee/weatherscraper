@@ -207,6 +207,8 @@ class cityweather(LogFormatter):
                 icon1 = [dict['icon'] for dict in y]
                 icon1 = ''.join(icon1)
                 descrip1 = ', '.join([dict['description'] for dict in y]).title()
+                if len(descrip1) >= 18:
+                    descrip1 = descrip1[0:15]
                 icon_url1 = f"http://openweathermap.org/img/wn/{icon1}@2x.png"
 
                 # Current City Coordinates
@@ -381,6 +383,8 @@ class cityweather(LogFormatter):
                 icon2 = [dict['icon'] for dict in b]
                 icon2 = ''.join(icon2)
                 descrip2 = ', '.join([dict['description'] for dict in b]).title()
+                if len(descrip2) >= 18:
+                    descrip2 = descrip2[0:15]
                 icon_url2 = f"http://openweathermap.org/img/wn/{icon2}@2x.png"
 
                 # Satellite City Coordinates
@@ -639,3 +643,4 @@ def main():
 # Call the main function
 if __name__ == "__main__":
     main()
+
