@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# coding:UTF-8
 
 import setuptools
 
@@ -18,6 +17,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3.8",
+        "Natural Language :: English",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: Microsoft :: Windows",
     ],
