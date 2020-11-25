@@ -272,7 +272,7 @@ class cityweather(LogFormatter):
                             if cur_secondchoice != '':
                                 cur_firstchoice.insert(0, cur_secondchoice[0])
                             else:
-                                print(f"City {city1} not found.")
+                                print(f"City {citi1} not found.")
                             cur_secondchoice += [listitem for listitem in cur_firstchoice if cur_capital in listitem]
                             if cur_secondchoice != '':
                                 cur_firstchoice.insert(0, cur_secondchoice[0])
@@ -445,7 +445,7 @@ class cityweather(LogFormatter):
                             if sat_secondchoice != '':
                                 sat_firstchoice.insert(0, sat_secondchoice[0])
                             else:
-                                print(f"City {city2} not found!")
+                                print(f"City {citi2} not found!")
                             sat_secondchoice += [listitem for listitem in sat_firstchoice if sat_capital in listitem]
                             if sat_secondchoice != '':
                                 sat_firstchoice.insert(0, sat_secondchoice[0])
