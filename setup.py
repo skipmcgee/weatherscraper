@@ -7,11 +7,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="The_Looters_WeatherApp",
+    name="WeatherApp",
     version="1.0.0",
-    author="Skip McGee",
+    author="SkipMcGee",
     author_email="davidfranklinmcgee@gmail.com",
-    description="Weather Application for displaying the weather in two different locations, written by 'The Looters'",
+    description="Weather Application for displaying the weather in two different locations, written by The Looters",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/skipmcgee/weatherscraper",
