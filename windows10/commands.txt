@@ -2,4 +2,4 @@
 pyinstaller --noconfirm --debug=all --onedir --add-data="README.md;." --add-data="LICENSE;." --add-data="day.png;." --add-data="img_notfound.jpeg;." --add-data="logo.png;." --add-data="night.png;." --noupx --name "WeatherApp" --icon=logo.ico --additional-hooks-dir=. --clean --icon="logo.ico" weatherscraper.py
 
 ### Initial Single Executable PyInstaller Command
-pyinstaller --noconfirm --debug=all --onefile --nowindow --add-data="README.md;." --add-data="LICENSE;." --add-data="day.png;." --add-data="img_notfound.jpeg;." --add-data="logo.png;." --add-data="night.png;." --noupx --name "WeatherApp" --icon=logo.ico --additional-hooks-dir=. --clean --icon="logo.ico" weatherscraper.py
+pyinstaller --noconfirm --debug=all --onefile --windowed --add-data="README.md;." --add-data="LICENSE;." --add-data="day.png;." --add-data="img_notfound.jpeg;." --add-data="logo.png;." --add-data="night.png;." --noupx --name "WeatherApp" --icon=logo.ico --additional-hooks-dir=. --clean --icon="logo.ico" weatherscraper.py
