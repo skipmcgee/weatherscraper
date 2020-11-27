@@ -15,6 +15,6 @@ pyinstaller --noconfirm --debug=all --onefile --noconsole --add-data="README.md;
 
 
 ### To-Do:
-- remove debug commands to increase application speed 
+- remove debug commands and readme / license additions to increase application speed and decrease size
 - add separate application hash file
 - re-add license and readme files
