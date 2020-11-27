@@ -11,3 +11,10 @@ pyinstaller -F -d all -w WeatherApp.spec
 
 ### Try Updated Single Executable PyInstaller Command
 pyinstaller --noconfirm --debug=all --onefile --noconsole --add-data="README.md;." --add-data="LICENSE;." --add-data="day.png;." --add-data="img_notfound.jpeg;." --add-data="logo.png;." --add-data="night.png;." --name "WeatherApp" --icon="logo.ico" --hidden-imports="tk" --hidden-imports="tkinter" --additional-hooks-dir=. --clean --icon="logo.ico" weatherscraper.py
+
+
+
+### To-Do:
+- remove debug commands to increase application speed 
+- add separate application hash file
+- re-add license and readme files
