@@ -27,4 +27,10 @@ In order to access the API utilized in this application:
 2. Build with folder commands and debug=all first, run the executable and troubleshoot any errors
 3. Install and run [DebugView](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview) before you run your application
 4. Try single file executable build last
+####
+### Application Requirements:
+- Windows 10
+- Internet Connection
+- Appropriate privilege to run an executable in your environment
+####
 #### The WeatherApp project is designed and built by Skip McGee
