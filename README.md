@@ -14,6 +14,6 @@ In order to access the API utilized in this application:
 2. pip install PyInstaller (version 4.1 used for my build)
 3. Edit your Environment Variables for PATH, adding C:\Windows\System32\downlevel and C:\Windows\SysWOW64\downlevel  (note: this isn't strictly neccessary but prevents PyInstaller from throwing a lot of errors)
 3. Confirm that you have the modules installed per [pip_list_installed](https://github.com/skipmcgee/weatherscraper/blob/win10exe/pip_list_installed)
-4. Run the pyinstalled commands per [Build_Commands](https://github.com/skipmcgee/weatherscraper/blob/win10exe/Build_Commands.md) 
+4. Run the pyinstaller commands per [Build_Commands](https://github.com/skipmcgee/weatherscraper/blob/win10exe/Build_Commands.md)
 5. If all instructions were followed with equal version, etc. check hashes for compatibility [Hashfile](https://github.com/skipmcgee/weatherscraper/blob/win10exe/Hashfile.txt)
 6. Execute application from the 'dist' folder
