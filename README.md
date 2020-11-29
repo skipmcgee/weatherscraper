@@ -9,7 +9,7 @@ In order to access the API utilized in this application:
 - Add your key to the "api_key" variable in the class definition in weatherscraper.py. Run this little application!
 - (Note: If you aren't a DJC2 20.2 "Looter", you might want to consider changing the application logo and default locations.)
 ####
-# WeatherApp Build Instructions
+# WeatherApp.exe Build Instructions
 1. Install Python 3.8.6 https://www.python.org/downloads/
 2. pip install PyInstaller (version 4.1 used for my build)
 3. Edit your Environment Variables for PATH, adding C:\Windows\System32\downlevel and C:\Windows\SysWOW64\downlevel  (note: this isn't strictly neccessary but prevents PyInstaller from throwing a lot of errors)
