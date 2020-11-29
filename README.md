@@ -3,7 +3,7 @@ Ever need to check if the distant end of a satellite connection is masking equip
 ####
 This application is designed to display the current weather at your location + the current weather at a second location of your choosing (such as hub/spoke satellite sites, etc.). The two locations can be any where across the globe, simply input the name of the nearest major city. The API data is updated approximately every 15 minutes, so a new search will be accurate to within that time period.
 ####
-Download and run the WeatherApp from [WeatherApp.zip](https://github.com/skipmcgee/weatherscraper/blob/win10exe/WeatherApp.zip) (includes a hashfile for validation).
+Download and run the current version of [WeatherApp](https://github.com/skipmcgee/WeatherApp/tree/main/download) (includes a hashfile for validation).
 ##
 # WeatherApp.exe Build Instructions
 In order to access the API utilized in this application: 
