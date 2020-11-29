@@ -20,7 +20,7 @@ In order to access the API utilized in this application:
 ####
 ### Troubleshooting:
 1. Run weatherscraper.py with python to ensure there aren't any issues with the script itself (like a missing api key)
-2. Build with folder and debug=all, run and troubleshoot any errors
+2. Build with folder commands and debug=all first, run the executable and troubleshoot any errors
 3. Install and run [DebugView](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview) before you run your application
 4. Try single executable mode last
 #### The WeatherApp project is designed and built by Skip McGee
