@@ -1,0 +1,11 @@
+MD5 hash of WeatherApp.exe:
+7a350e9c2725b3ae14771b4b16988535
+
+SHA1 hash of WeatherApp.exe:
+6343b9dd4dc5f9f7399749c7ef7e51894f5a376b
+
+SHA256 hash of WeatherApp.exe:
+9ae480e7f7358924192c50dc04cd526ecc9336a1b59c213199e23f769f83af74
+
+SHA512 hash of WeatherApp.exe:
+e3cab3d45b7add45904c2eb22654f3572f52bccd620eb8a66d5a33b257634831a92370ea073c6c453ec65c9562586bf55692518b365daa41cee7c104b96f4aae
