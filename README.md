@@ -17,3 +17,7 @@ In order to access the API utilized in this application:
 4. Run the pyinstaller commands per [Build_Commands](https://github.com/skipmcgee/weatherscraper/blob/win10exe/Build_Commands.md)
 5. If all instructions were followed with equal version, etc. check hashes for compatibility [Hashfile](https://github.com/skipmcgee/weatherscraper/blob/win10exe/Hashfile.txt)
 6. Execute application from the 'dist' folder
+####
+### Troubleshooting:
+Install and run [DebugView](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview) before you run your application
+#### The WeatherApp project is designed and built by Skip McGee
