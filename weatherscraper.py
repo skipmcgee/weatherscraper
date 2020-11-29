@@ -140,7 +140,7 @@ class cityweather(LogFormatter):
         self.l = 580
         self.cur_city = cur_city
         self.sat_city = sat_city
-        self.api_key = "316487bc42fbc0f39111533690c6d4e4"
+        self.api_key = ""
         if self.api_key == "":
             error = "No API Key specified, please add your API key and try again"
             self.message(error, level=4)
